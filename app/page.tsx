@@ -105,8 +105,7 @@ const TitaniumCoin = () => (
 export default function BestRideApp() {
   const [isUsingGps, setIsUsingGps] = useState(true)
   const [manualPickup, setManualPickup] = useState('')
-  const [hasStop, setHasStop] = useState(false)
-  const [stopAddress, setStopAddress] = useState('')
+  const [stops, setStops] = useState<string[]>([])
   const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
 
   const [isComparing, setIsComparing] = useState(false)
@@ -115,7 +114,7 @@ export default function BestRideApp() {
   const [priceUber, setPriceUber] = useState<string | null>(null)
   const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string } | null>(null)
 
-  // Coordenadas padrão de teste (SJC)
+  // Coordenadas padrão de apoio
   const pickupLat = '-23.2055'
   const pickupLng = '-45.8841'
   const destLat = '-23.1896'
@@ -131,10 +130,33 @@ export default function BestRideApp() {
     }
   }
 
+  const addStop = () => {
+    if (stops.length < 2) {
+      setStops([...stops, ''])
+    }
+  }
+
+  const removeStop = (index: number) => {
+    setStops(stops.filter((_, i) => i !== index))
+  }
+
+  const updateStop = (index: number, value: string) => {
+    const updated = [...stops]
+    updated[index] = value
+    setStops(updated)
+  }
+
   const handleCompare = () => {
     setIsComparing(true)
     setTimeout(() => {
-      if (hasStop) {
+      if (stops.length === 2) {
+        setPrice99('R$ 16,90')
+        setPriceUber('R$ 24,50')
+        setTripTelemetry({
+          distance: 'aproximadamente 12,3 km',
+          time: '28 a 35 min'
+        })
+      } else if (stops.length === 1) {
         setPrice99('R$ 12,40')
         setPriceUber('R$ 19,80')
         setTripTelemetry({
@@ -162,7 +184,6 @@ export default function BestRideApp() {
       ? 'pickup=my_location'
       : `pickup[formatted_address]=${encodedPickup}&pickup[nickname]=${encodedPickup}`
 
-    // Monta deep link com ou sem parada
     const nativeUri = `uber://?action=setPickup&${pickupParam}&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedDest}&dropoff[formatted_address]=${encodedDest}`
     window.location.assign(nativeUri)
   }
@@ -173,6 +194,12 @@ export default function BestRideApp() {
     const native99Uri = `taxis99://call?pickup_latitude=${pickupLat}&pickup_longitude=${pickupLng}&pickup_title=${pickupTitle}&dropoff_latitude=${destLat}&dropoff_longitude=${destLng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
     window.location.assign(native99Uri)
   }
+
+  // Altura proporcional para a rota conforme o número de paradas
+  const svgHeight = stops.length === 2 ? 132 : stops.length === 1 ? 88 : 44
+  const lineY2 = stops.length === 2 ? 122 : stops.length === 1 ? 78 : 34
+  const arrowY = stops.length === 2 ? 121 : stops.length === 1 ? 77 : 33
+  const arrowTipY = stops.length === 2 ? 128 : stops.length === 1 ? 84 : 40
 
   return (
     <main style={{
@@ -200,7 +227,7 @@ export default function BestRideApp() {
         marginBottom: '14px',
         position: 'relative'
       }}>
-        {/* Linha vertical tracejada dinâmica */}
+        {/* Linha vertical tracejada com controle dinâmico */}
         <div style={{
           position: 'absolute',
           left: '14px',
@@ -211,19 +238,19 @@ export default function BestRideApp() {
           justifyContent: 'center',
           pointerEvents: 'none'
         }}>
-          <svg width="14" height="100%" viewBox={hasStop ? "0 0 14 88" : "0 0 14 44"} preserveAspectRatio="none" fill="none">
+          <svg width="14" height="100%" viewBox={`0 0 14 ${svgHeight}`} preserveAspectRatio="none" fill="none">
             <line
               x1="7"
               y1="2"
               x2="7"
-              y2={hasStop ? "78" : "34"}
+              y2={lineY2}
               stroke="#94a3b8"
               strokeWidth="2"
               strokeDasharray="3 3"
               strokeLinecap="round"
             />
             <path
-              d={hasStop ? "M3 77L7 84L11 77" : "M3 33L7 40L11 33"}
+              d={`M3 ${arrowY}L7 ${arrowTipY}L11 ${arrowY}`}
               stroke="#94a3b8"
               strokeWidth="2"
               strokeLinecap="round"
@@ -289,28 +316,27 @@ export default function BestRideApp() {
           </button>
         </div>
 
-        {/* Divisória sutil */}
         <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
 
-        {/* Linha Intermediária: Parada Opcional */}
-        {hasStop && (
-          <>
+        {/* Paradas Intermediárias (Até 2 paradas) */}
+        {stops.map((stop, index) => (
+          <React.Fragment key={index}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
                 <div style={{
                   width: '14px',
                   height: '14px',
                   borderRadius: '50%',
-                  backgroundColor: '#f59e0b',
-                  boxShadow: '0 0 0 3px rgba(245, 158, 11, 0.2)',
+                  backgroundColor: index === 0 ? '#f59e0b' : '#fb923c',
+                  boxShadow: index === 0 ? '0 0 0 3px rgba(245, 158, 11, 0.2)' : '0 0 0 3px rgba(251, 146, 60, 0.2)',
                   flexShrink: 0
                 }} />
                 <input
                   type="text"
-                  autoFocus
-                  value={stopAddress}
-                  onChange={(e) => setStopAddress(e.target.value)}
-                  placeholder="Parada intermediária (ex: Faculdade)"
+                  autoFocus={index === stops.length - 1}
+                  value={stop}
+                  onChange={(e) => updateStop(index, e.target.value)}
+                  placeholder={`Parada ${index + 1} (ex: Faculdade, Restaurante...)`}
                   style={{
                     width: '100%',
                     border: 'none',
@@ -324,10 +350,7 @@ export default function BestRideApp() {
               </div>
 
               <button
-                onClick={() => {
-                  setHasStop(false)
-                  setStopAddress('')
-                }}
+                onClick={() => removeStop(index)}
                 title="Remover parada"
                 style={{
                   border: 'none',
@@ -348,10 +371,10 @@ export default function BestRideApp() {
               </button>
             </div>
             <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
-          </>
-        )}
+          </React.Fragment>
+        ))}
 
-        {/* Linha 2 / Final: Destino */}
+        {/* Linha Final: Destino */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
             <div style={{
@@ -379,10 +402,10 @@ export default function BestRideApp() {
             />
           </div>
 
-          {/* Botão sutil de adicionar parada (caso ainda não tenha adicionado) */}
-          {!hasStop && (
+          {/* Permite adicionar até 2 paradas */}
+          {stops.length < 2 && (
             <button
-              onClick={() => setHasStop(true)}
+              onClick={addStop}
               style={{
                 border: 'none',
                 backgroundColor: '#f8fafc',
