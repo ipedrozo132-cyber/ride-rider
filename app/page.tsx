@@ -107,6 +107,12 @@ export default function BestRideApp() {
   const [manualPickup, setManualPickup] = useState('')
   const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
 
+  // Controle de comparação e cotação
+  const [isComparing, setIsComparing] = useState(false)
+  const [hasCompared, setHasCompared] = useState(false)
+  const [price99, setPrice99] = useState<string | null>(null)
+  const [priceUber, setPriceUber] = useState<string | null>(null)
+
   // Coordenadas padrão de apoio
   const pickupLat = '-23.2055'
   const pickupLng = '-45.8841'
@@ -121,6 +127,18 @@ export default function BestRideApp() {
       setIsUsingGps(true)
       setManualPickup('')
     }
+  }
+
+  // Ação de comparar / recalcular
+  const handleCompare = () => {
+    setIsComparing(true)
+    setTimeout(() => {
+      // Simulação de cálculo com pequenas variações realistas
+      setPrice99('R$ 7,80')
+      setPriceUber('R$ 14,20')
+      setHasCompared(true)
+      setIsComparing(false)
+    }, 600)
   }
 
   const handleUberClick = () => {
@@ -165,10 +183,10 @@ export default function BestRideApp() {
         border: '1px solid #e2e8f0',
         padding: '16px 14px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-        marginBottom: '20px',
+        marginBottom: '16px',
         position: 'relative'
       }}>
-        {/* Linha vertical tracejada com seta apontando para baixo */}
+        {/* Linha vertical tracejada com seta */}
         <div style={{
           position: 'absolute',
           left: '20px',
@@ -180,7 +198,6 @@ export default function BestRideApp() {
           pointerEvents: 'none'
         }}>
           <svg width="12" height="100%" viewBox="0 0 12 40" preserveAspectRatio="none" fill="none">
-            {/* Linha tracejada suave */}
             <line
               x1="6"
               y1="0"
@@ -191,7 +208,6 @@ export default function BestRideApp() {
               strokeDasharray="3 3"
               strokeLinecap="round"
             />
-            {/* Ponta da seta apontando para o ponto vermelho */}
             <path
               d="M3 31L6 37L9 31"
               stroke="#94a3b8"
@@ -202,7 +218,7 @@ export default function BestRideApp() {
           </svg>
         </div>
 
-        {/* Linha 1: Ponto de Partida + Botão Alternador */}
+        {/* Linha 1: Partida */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
             <div style={{
@@ -238,7 +254,6 @@ export default function BestRideApp() {
             )}
           </div>
 
-          {/* Botão de Alternância */}
           <button
             onClick={toggleGpsMode}
             style={{
@@ -260,10 +275,10 @@ export default function BestRideApp() {
           </button>
         </div>
 
-        {/* Divisória sutil */}
+        {/* Divisória */}
         <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '26px', marginBottom: '14px' }} />
 
-        {/* Linha 2: Ponto de Destino */}
+        {/* Linha 2: Destino */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' }}>
           <div style={{
             width: '12px',
@@ -290,6 +305,38 @@ export default function BestRideApp() {
           />
         </div>
       </div>
+
+      {/* Botão de Comparar / Atualizar */}
+      <button
+        onClick={handleCompare}
+        disabled={isComparing}
+        style={{
+          width: '100%',
+          backgroundColor: hasCompared ? '#0f172a' : '#044e42',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '14px',
+          padding: '13px 16px',
+          fontSize: '14px',
+          fontWeight: '700',
+          cursor: isComparing ? 'wait' : 'pointer',
+          marginBottom: '18px',
+          boxShadow: '0 4px 12px rgba(4, 78, 66, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        {isComparing ? (
+          'Buscando tarifas...'
+        ) : hasCompared ? (
+          '🔄 Atualizar Tarifas'
+        ) : (
+          '🔍 Comparar Tarifas'
+        )}
+      </button>
 
       {/* Cards Lado a Lado (99 e Uber) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
@@ -323,8 +370,8 @@ export default function BestRideApp() {
           }}>
             <span style={{ fontSize: '19px', fontWeight: '950', color: '#000', letterSpacing: '-0.05em' }}>99</span>
           </div>
-          <span style={{ fontSize: '13.5px', fontWeight: '750', color: '#334155' }}>
-            (R$ 7,80)
+          <span style={{ fontSize: '13px', fontWeight: '750', color: hasCompared ? '#044e42' : '#94a3b8' }}>
+            {hasCompared ? price99 : 'Toque em Comparar'}
           </span>
         </button>
 
@@ -349,8 +396,8 @@ export default function BestRideApp() {
           <span style={{ fontSize: '20px', fontWeight: '850', color: '#000000', height: '34px', display: 'flex', alignItems: 'center' }}>
             UberX
           </span>
-          <span style={{ fontSize: '13.5px', fontWeight: '750', color: '#334155' }}>
-            (R$ 14,20)
+          <span style={{ fontSize: '13px', fontWeight: '750', color: hasCompared ? '#044e42' : '#94a3b8' }}>
+            {hasCompared ? priceUber : 'Toque em Comparar'}
           </span>
         </button>
       </div>
