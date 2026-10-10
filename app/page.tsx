@@ -8,32 +8,20 @@ export default function RideRiderPOC() {
   const destLat = '-23.1896'
   const destLng = '-45.8841'
 
-  // Disparo Uber com Intent específico do Android
+  // Chamada direta do protocolo nativo Uber
   const handleUberClick = () => {
     const encodedName = encodeURIComponent(destinationName)
-    const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent)
-
-    if (isAndroid) {
-      // Intent nativo que força o app da Uber a abrir sem passar pela Play Store
-      const androidIntent = `intent://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}#Intent;scheme=https;package=com.ubercab;end`
-      window.location.href = androidIntent
-    } else {
-      // iOS / Safari
-      window.location.href = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}`
-    }
+    // O protocolo uber:// invoca o app instalado diretamente sem bater na Google Play
+    const nativeUri = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}&dropoff[formatted_address]=${encodedName}`
+    window.location.assign(nativeUri)
   }
 
-  // Disparo 99 com Intent específico do Android
+  // Chamada direta do protocolo nativo 99
   const handle99Click = () => {
     const encodedName = encodeURIComponent(destinationName)
-    const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent)
-
-    if (isAndroid) {
-      const android99Intent = `intent://page.didiglobal.com/passenger/index.html?dest_lat=${destLat}&dest_lng=${destLng}&dest_name=${encodedName}#Intent;scheme=taxis99;package=com.taxis99;end`
-      window.location.href = android99Intent
-    } else {
-      window.location.href = `taxis99://call?lat=${destLat}&lng=${destLng}&name=${encodedName}`
-    }
+    // Esquema de deep link direto da 99
+    const native99Uri = `taxis99://call?lat=${destLat}&lng=${destLng}&name=${encodedName}`
+    window.location.assign(native99Uri)
   }
 
   return (
@@ -72,7 +60,7 @@ export default function RideRiderPOC() {
             borderRadius: '12px',
             fontWeight: '600'
           }}>
-            POC v0.4
+            POC v0.5
           </span>
         </header>
 
