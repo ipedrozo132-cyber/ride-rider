@@ -111,6 +111,7 @@ export default function BestRideApp() {
   const [hasCompared, setHasCompared] = useState(false)
   const [price99, setPrice99] = useState<string | null>(null)
   const [priceUber, setPriceUber] = useState<string | null>(null)
+  const [estimatedTripTime, setEstimatedTripTime] = useState<string | null>(null)
 
   // Coordenadas padrão de apoio
   const pickupLat = '-23.2055'
@@ -133,6 +134,7 @@ export default function BestRideApp() {
     setTimeout(() => {
       setPrice99('R$ 7,80')
       setPriceUber('R$ 14,20')
+      setEstimatedTripTime('aproximadamente 12 a 15 min')
       setHasCompared(true)
       setIsComparing(false)
     }, 600)
@@ -180,10 +182,10 @@ export default function BestRideApp() {
         border: '1px solid #e2e8f0',
         padding: '16px 14px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-        marginBottom: '16px',
+        marginBottom: '14px',
         position: 'relative'
       }}>
-        {/* Linha vertical tracejada alinhada ao centro dos círculos */}
+        {/* Linha vertical tracejada com seta */}
         <div style={{
           position: 'absolute',
           left: '14px',
@@ -303,8 +305,32 @@ export default function BestRideApp() {
         </div>
       </div>
 
+      {/* Cápsula Informativa de Tempo de Trajeto (Aparece após comparar) */}
+      {hasCompared && (
+        <div style={{
+          backgroundColor: '#f1f5f9',
+          borderRadius: '12px',
+          padding: '8px 12px',
+          marginBottom: '14px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '2px',
+          border: '1px solid #e2e8f0'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#1e293b' }}>
+            <span>⏱️ Viagem estimada:</span>
+            <span style={{ color: '#044e42' }}>{estimatedTripTime} de trajeto</span>
+          </div>
+          <span style={{ fontSize: '10px', color: '#64748b', fontWeight: '500' }}>
+            (tempo de espera pelo motorista a cargo de cada aplicativo)
+          </span>
+        </div>
+      )}
+
       {/* Cards Lado a Lado (99 e Uber) */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
         {/* Card 99 */}
         <button
           onClick={handle99Click}
