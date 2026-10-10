@@ -5,22 +5,28 @@ import { Navigation, ArrowRight, ShieldCheck, Zap } from 'lucide-react'
 
 export default function RideRiderPOC() {
   const [destinationName, setDestinationName] = useState('Praça Afonso Pena')
+  
+  // Coordenadas aproximadas de teste em São José dos Campos (Vila Betânia -> Centro)
+  const pickupLat = '-23.2055'
+  const pickupLng = '-45.8841'
   const destLat = '-23.1896'
   const destLng = '-45.8841'
 
-  // Chamada direta do protocolo nativo Uber
+  // Chamada Uber (Já 100% validada)
   const handleUberClick = () => {
     const encodedName = encodeURIComponent(destinationName)
-    // O protocolo uber:// invoca o app instalado diretamente sem bater na Google Play
     const nativeUri = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}&dropoff[formatted_address]=${encodedName}`
     window.location.assign(nativeUri)
   }
 
-  // Chamada direta do protocolo nativo 99
+  // Chamada 99 com os parâmetros oficiais obrigatórios de partida e destino
   const handle99Click = () => {
-    const encodedName = encodeURIComponent(destinationName)
-    // Esquema de deep link direto da 99
-    const native99Uri = `taxis99://call?lat=${destLat}&lng=${destLng}&name=${encodedName}`
+    const encodedDest = encodeURIComponent(destinationName)
+    const encodedPickup = encodeURIComponent('Minha Localização')
+    
+    // A 99 exige o par completo: pickup + dropoff
+    const native99Uri = `taxis99://call?pickup_latitude=${pickupLat}&pickup_longitude=${pickupLng}&pickup_title=${encodedPickup}&dropoff_latitude=${destLat}&dropoff_longitude=${destLng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
+    
     window.location.assign(native99Uri)
   }
 
@@ -60,7 +66,7 @@ export default function RideRiderPOC() {
             borderRadius: '12px',
             fontWeight: '600'
           }}>
-            POC v0.5
+            POC v0.6
           </span>
         </header>
 
