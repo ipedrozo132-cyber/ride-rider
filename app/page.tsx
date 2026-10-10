@@ -1,32 +1,39 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Navigation, ArrowRight, ShieldCheck, Zap } from 'lucide-react'
+import { Navigation, ArrowRight, ShieldCheck, Zap, MapPin, Edit3 } from 'lucide-react'
 
-export default function RideRiderPOC() {
-  const [destinationName, setDestinationName] = useState('Praça Afonso Pena')
-  
-  // Coordenadas aproximadas de teste em São José dos Campos (Vila Betânia -> Centro)
+export default function BestRideApp() {
+  // Controle do ponto de partida: GPS automático ou Manual
+  const [useGps, setUseGps] = useState(true)
+  const [pickupAddress, setPickupAddress] = useState('Minha localização atual')
+  const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
+
+  // Coordenadas padrão de teste (SJC: Vila Betânia -> Centro)
   const pickupLat = '-23.2055'
   const pickupLng = '-45.8841'
   const destLat = '-23.1896'
   const destLng = '-45.8841'
 
-  // Chamada Uber (Já 100% validada)
+  // Disparo Uber com suporte a GPS ou endereço customizado
   const handleUberClick = () => {
-    const encodedName = encodeURIComponent(destinationName)
-    const nativeUri = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}&dropoff[formatted_address]=${encodedName}`
+    const encodedDest = encodeURIComponent(destinationAddress)
+    const encodedPickup = encodeURIComponent(pickupAddress)
+
+    const pickupParam = useGps 
+      ? 'pickup=my_location' 
+      : `pickup[latitude]=${pickupLat}&pickup[longitude]=${pickupLng}&pickup[formatted_address]=${encodedPickup}`
+
+    const nativeUri = `uber://?action=setPickup&${pickupParam}&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedDest}&dropoff[formatted_address]=${encodedDest}`
     window.location.assign(nativeUri)
   }
 
-  // Chamada 99 com os parâmetros oficiais obrigatórios de partida e destino
+  // Disparo 99 com suporte a GPS ou endereço customizado
   const handle99Click = () => {
-    const encodedDest = encodeURIComponent(destinationName)
-    const encodedPickup = encodeURIComponent('Minha Localização')
-    
-    // A 99 exige o par completo: pickup + dropoff
+    const encodedDest = encodeURIComponent(destinationAddress)
+    const encodedPickup = encodeURIComponent(useGps ? 'Minha Localização' : pickupAddress)
+
     const native99Uri = `taxis99://call?pickup_latitude=${pickupLat}&pickup_longitude=${pickupLng}&pickup_title=${encodedPickup}&dropoff_latitude=${destLat}&dropoff_longitude=${destLng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
-    
     window.location.assign(native99Uri)
   }
 
@@ -45,16 +52,28 @@ export default function RideRiderPOC() {
       margin: '0 auto'
     }}>
       <div>
+        {/* Topo com Marca Oficial Best Ride */}
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Zap size={22} color="#00E676" />
-              <h1 style={{ fontSize: '20px', fontWeight: '800', letterSpacing: '-0.02em', margin: 0 }}>
-                RIDE<span style={{ color: '#00E676' }}>RIDER</span>
+              <div style={{
+                width: '28px',
+                height: '28px',
+                borderRadius: '8px',
+                backgroundColor: 'rgba(0, 230, 118, 0.15)',
+                border: '1px solid #00E676',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <Zap size={18} color="#00E676" />
+              </div>
+              <h1 style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '0.02em', margin: 0 }}>
+                BEST <span style={{ color: '#00E676' }}>RIDE</span>
               </h1>
             </div>
-            <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>
-              Comparador de Tarifas & Despacho Imediato
+            <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>
+              Comparador Inteligente & Despacho Imediato
             </p>
           </div>
           <span style={{
@@ -66,51 +85,124 @@ export default function RideRiderPOC() {
             borderRadius: '12px',
             fontWeight: '600'
           }}>
-            POC v0.6
+            v1.0 Ready
           </span>
         </header>
 
-        {/* Bloco de Rota */}
+        {/* Bloco de Rotas (Partida Flexível + Destino) */}
         <div style={{
           backgroundColor: '#131823',
           border: '1px solid #1e293b',
-          borderRadius: '14px',
+          borderRadius: '16px',
           padding: '14px',
-          marginBottom: '16px'
+          marginBottom: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
-            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00E676' }} />
-            <span style={{ fontSize: '12px', color: '#94a3b8' }}>Partida: <strong>Minha localização atual (GPS)</strong></span>
+          {/* Campo de Partida com Chave de Alternância */}
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+              <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Ponto de Partida
+              </span>
+              <button
+                onClick={() => {
+                  setUseGps(!useGps)
+                  if (useGps) setPickupAddress('Vila Betânia')
+                  else setPickupAddress('Minha localização atual')
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#38bdf8',
+                  fontSize: '11px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: 0
+                }}
+              >
+                <Edit3 size={11} />
+                {useGps ? 'Digitar endereço' : 'Usar meu GPS'}
+              </button>
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#0a0d14',
+              border: '1px solid #334155',
+              borderRadius: '8px',
+              padding: '8px 10px'
+            }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: useGps ? '#00E676' : '#38bdf8' }} />
+              {useGps ? (
+                <span style={{ fontSize: '13px', color: '#fff', fontWeight: '500' }}>
+                  Minha localização atual (GPS)
+                </span>
+              ) : (
+                <input
+                  type="text"
+                  value={pickupAddress}
+                  onChange={(e) => setPickupAddress(e.target.value)}
+                  placeholder="Endereço de partida..."
+                  style={{
+                    width: '100%',
+                    background: 'none',
+                    border: 'none',
+                    color: '#fff',
+                    fontSize: '13px',
+                    outline: 'none'
+                  }}
+                />
+              )}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Navigation size={14} color="#38bdf8" />
-            <input
-              type="text"
-              value={destinationName}
-              onChange={(e) => setDestinationName(e.target.value)}
-              placeholder="Digite o destino..."
-              style={{
-                width: '100%',
-                backgroundColor: '#0a0d14',
-                border: '1px solid #334155',
-                borderRadius: '8px',
-                padding: '8px 10px',
-                color: '#fff',
-                fontSize: '13px',
-                outline: 'none'
-              }}
-            />
+          {/* Campo de Destino */}
+          <div>
+            <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: '6px' }}>
+              Destino
+            </span>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#0a0d14',
+              border: '1px solid #334155',
+              borderRadius: '8px',
+              padding: '8px 10px'
+            }}>
+              <MapPin size={14} color="#f43f5e" />
+              <input
+                type="text"
+                value={destinationAddress}
+                onChange={(e) => setDestinationAddress(e.target.value)}
+                placeholder="Para onde vamos?"
+                style={{
+                  width: '100%',
+                  background: 'none',
+                  border: 'none',
+                  color: '#fff',
+                  fontSize: '13px',
+                  outline: 'none'
+                }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* Lista de Opções */}
+        {/* Cotações em Tempo Real */}
         <h2 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '10px' }}>
-          Melhores Opções em Tempo Real
+          Melhores Opções de Corrida
         </h2>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* Card 99 */}
+          {/* Card 99 Pop */}
           <div style={{
             backgroundColor: '#131823',
             border: '1px solid #22c55e',
@@ -160,7 +252,7 @@ export default function RideRiderPOC() {
             </div>
           </div>
 
-          {/* Card Uber */}
+          {/* Card UberX */}
           <div style={{
             backgroundColor: '#131823',
             border: '1px solid #1e293b',
@@ -202,16 +294,54 @@ export default function RideRiderPOC() {
         </div>
       </div>
 
+      {/* Rodapé Titânio Escovado Infinite Intelligence Labs */}
       <footer style={{
-        marginTop: '20px',
+        marginTop: '24px',
         textAlign: 'center',
         borderTop: '1px solid #1e293b',
-        paddingTop: '12px'
+        paddingTop: '14px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#64748b', fontSize: '11px', marginBottom: '6px' }}>
-          <ShieldCheck size={13} color="#00E676" />
-          <span>Deep Link Seguro • Sem intermediação financeira</span>
+        <div style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+          background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)',
+          border: '1px solid #334155',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1)',
+          padding: '4px 10px',
+          borderRadius: '20px',
+          marginBottom: '8px'
+        }}>
+          <span style={{
+            fontSize: '12px',
+            fontFamily: 'Georgia, serif',
+            fontStyle: 'italic',
+            fontWeight: 'bold',
+            background: 'linear-gradient(135deg, #f1f5f9 0%, #94a3b8 50%, #cbd5e1 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '0.05em'
+          }}>
+            i<sup>∞</sup>
+          </span>
+          <span style={{
+            fontSize: '10px',
+            fontWeight: '700',
+            letterSpacing: '0.06em',
+            background: 'linear-gradient(135deg, #f8fafc 0%, #cbd5e1 50%, #94a3b8 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textTransform: 'uppercase'
+          }}>
+            Infinite Intelligence Labs
+          </span>
         </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', color: '#64748b', fontSize: '10px', marginBottom: '4px' }}>
+          <ShieldCheck size={12} color="#00E676" />
+          <span>Protocolo Nativo Direto • Sem taxas intermediárias</span>
+        </div>
+
         <p style={{
           fontSize: '9px',
           color: '#475569',
@@ -220,7 +350,7 @@ export default function RideRiderPOC() {
           margin: 0,
           fontWeight: '600'
         }}>
-          © 2026 INFINITE INTELLIGENCE LABS • ALL RIGHTS RESERVED
+          © 2026 BEST RIDE • ALL RIGHTS RESERVED
         </p>
       </footer>
     </main>
