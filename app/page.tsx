@@ -1,10 +1,49 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Navigation, ArrowRight, ShieldCheck, Zap, MapPin, Edit3 } from 'lucide-react'
+import { ArrowRight, ShieldCheck, MapPin, Edit3 } from 'lucide-react'
+
+// Logotipo Proprietário: Letra "B" estilizada com curvas de rota em verde esmeralda
+const BestRideLogo = ({ size = 28 }: { size?: number }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 32 32"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+    style={{ filter: 'drop-shadow(0 0 8px rgba(0, 230, 118, 0.35))' }}
+  >
+    {/* Contêiner com efeito de vidro fosco */}
+    <rect width="32" height="32" rx="9" fill="#131823" stroke="#1e293b" strokeWidth="1" />
+    {/* Haste esquerda / Ponto de partida */}
+    <path
+      d="M9 7.5V24.5"
+      stroke="#00E676"
+      strokeWidth="3.2"
+      strokeLinecap="round"
+    />
+    {/* Curva superior de rota */}
+    <path
+      d="M9 8.5H16C19.3 8.5 22 11.2 22 14.5C22 16 20.8 17.5 19 18"
+      stroke="#00E676"
+      strokeWidth="2.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Curva inferior de rota acelerada */}
+    <path
+      d="M9 16.5H17C20.5 16.5 23.5 19.5 23.5 23C23.5 24 22.5 24.5 21 24.5H9"
+      stroke="#00E676"
+      strokeWidth="2.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+    {/* Ponto de destino final em ciano */}
+    <circle cx="21" cy="24.5" r="1.5" fill="#38bdf8" />
+  </svg>
+)
 
 export default function BestRideApp() {
-  // Controle do ponto de partida: GPS automático ou Manual
   const [useGps, setUseGps] = useState(true)
   const [pickupAddress, setPickupAddress] = useState('Minha localização atual')
   const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
@@ -15,7 +54,6 @@ export default function BestRideApp() {
   const destLat = '-23.1896'
   const destLng = '-45.8841'
 
-  // Disparo Uber com suporte a GPS ou endereço customizado
   const handleUberClick = () => {
     const encodedDest = encodeURIComponent(destinationAddress)
     const encodedPickup = encodeURIComponent(pickupAddress)
@@ -28,7 +66,6 @@ export default function BestRideApp() {
     window.location.assign(nativeUri)
   }
 
-  // Disparo 99 com suporte a GPS ou endereço customizado
   const handle99Click = () => {
     const encodedDest = encodeURIComponent(destinationAddress)
     const encodedPickup = encodeURIComponent(useGps ? 'Minha Localização' : pickupAddress)
@@ -52,27 +89,16 @@ export default function BestRideApp() {
       margin: '0 auto'
     }}>
       <div>
-        {/* Topo com Marca Oficial Best Ride */}
+        {/* Cabeçalho Oficial com Logo B Proprietário */}
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '8px',
-                backgroundColor: 'rgba(0, 230, 118, 0.15)',
-                border: '1px solid #00E676',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <Zap size={18} color="#00E676" />
-              </div>
-              <h1 style={{ fontSize: '20px', fontWeight: '900', letterSpacing: '0.02em', margin: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <BestRideLogo size={32} />
+              <h1 style={{ fontSize: '21px', fontWeight: '900', letterSpacing: '0.02em', margin: 0 }}>
                 BEST <span style={{ color: '#00E676' }}>RIDE</span>
               </h1>
             </div>
-            <p style={{ fontSize: '11px', color: '#64748b', margin: '2px 0 0 0' }}>
+            <p style={{ fontSize: '11px', color: '#64748b', margin: '3px 0 0 0' }}>
               Comparador Inteligente & Despacho Imediato
             </p>
           </div>
@@ -89,7 +115,7 @@ export default function BestRideApp() {
           </span>
         </header>
 
-        {/* Bloco de Rotas (Partida Flexível + Destino) */}
+        {/* Bloco de Rotas */}
         <div style={{
           backgroundColor: '#131823',
           border: '1px solid #1e293b',
@@ -100,7 +126,6 @@ export default function BestRideApp() {
           flexDirection: 'column',
           gap: '12px'
         }}>
-          {/* Campo de Partida com Chave de Alternância */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
               <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
@@ -163,7 +188,6 @@ export default function BestRideApp() {
             </div>
           </div>
 
-          {/* Campo de Destino */}
           <div>
             <span style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em', display: 'block', marginBottom: '6px' }}>
               Destino
@@ -196,7 +220,7 @@ export default function BestRideApp() {
           </div>
         </div>
 
-        {/* Cotações em Tempo Real */}
+        {/* Melhores Opções */}
         <h2 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '10px' }}>
           Melhores Opções de Corrida
         </h2>
@@ -294,7 +318,7 @@ export default function BestRideApp() {
         </div>
       </div>
 
-      {/* Rodapé Titânio Escovado Infinite Intelligence Labs */}
+      {/* Assinatura Infinite Intelligence Labs */}
       <footer style={{
         marginTop: '24px',
         textAlign: 'center',
