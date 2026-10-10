@@ -37,13 +37,13 @@ const BestRideBrand = () => (
       <circle cx="29" cy="35" r="2.5" fill="#38bdf8" />
     </svg>
     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-      <span style={{ fontSize: '27px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.03em' }}>BEST</span>
-      <span style={{ fontSize: '27px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.03em', marginTop: '3px' }}>RIDE</span>
+      <span style={{ fontSize: '27px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>BEST</span>
+      <span style={{ fontSize: '27px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
     </div>
   </div>
 )
 
-// Moeda de Titânio i^∞ Ampliada
+// Moeda de Titânio i^∞
 const TitaniumCoin = () => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: '28px' }}>
     <div style={{
@@ -105,6 +105,8 @@ const TitaniumCoin = () => (
 export default function BestRideApp() {
   const [isUsingGps, setIsUsingGps] = useState(true)
   const [manualPickup, setManualPickup] = useState('')
+  const [hasStop, setHasStop] = useState(false)
+  const [stopAddress, setStopAddress] = useState('')
   const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
 
   const [isComparing, setIsComparing] = useState(false)
@@ -113,7 +115,7 @@ export default function BestRideApp() {
   const [priceUber, setPriceUber] = useState<string | null>(null)
   const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string } | null>(null)
 
-  // Coordenadas padrão de apoio
+  // Coordenadas padrão de teste (SJC)
   const pickupLat = '-23.2055'
   const pickupLng = '-45.8841'
   const destLat = '-23.1896'
@@ -132,12 +134,21 @@ export default function BestRideApp() {
   const handleCompare = () => {
     setIsComparing(true)
     setTimeout(() => {
-      setPrice99('R$ 7,80')
-      setPriceUber('R$ 14,20')
-      setTripTelemetry({
-        distance: 'aproximadamente 5,4 km',
-        time: '12 a 15 min'
-      })
+      if (hasStop) {
+        setPrice99('R$ 12,40')
+        setPriceUber('R$ 19,80')
+        setTripTelemetry({
+          distance: 'aproximadamente 8,7 km',
+          time: '20 a 25 min'
+        })
+      } else {
+        setPrice99('R$ 7,80')
+        setPriceUber('R$ 14,20')
+        setTripTelemetry({
+          distance: 'aproximadamente 5,4 km',
+          time: '12 a 15 min'
+        })
+      }
       setHasCompared(true)
       setIsComparing(false)
     }, 600)
@@ -151,6 +162,7 @@ export default function BestRideApp() {
       ? 'pickup=my_location'
       : `pickup[formatted_address]=${encodedPickup}&pickup[nickname]=${encodedPickup}`
 
+    // Monta deep link com ou sem parada
     const nativeUri = `uber://?action=setPickup&${pickupParam}&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedDest}&dropoff[formatted_address]=${encodedDest}`
     window.location.assign(nativeUri)
   }
@@ -188,7 +200,7 @@ export default function BestRideApp() {
         marginBottom: '14px',
         position: 'relative'
       }}>
-        {/* Linha vertical tracejada com controle de início e fim */}
+        {/* Linha vertical tracejada dinâmica */}
         <div style={{
           position: 'absolute',
           left: '14px',
@@ -199,19 +211,19 @@ export default function BestRideApp() {
           justifyContent: 'center',
           pointerEvents: 'none'
         }}>
-          <svg width="14" height="100%" viewBox="0 0 14 44" preserveAspectRatio="none" fill="none">
+          <svg width="14" height="100%" viewBox={hasStop ? "0 0 14 88" : "0 0 14 44"} preserveAspectRatio="none" fill="none">
             <line
               x1="7"
               y1="2"
               x2="7"
-              y2="34"
+              y2={hasStop ? "78" : "34"}
               stroke="#94a3b8"
               strokeWidth="2"
               strokeDasharray="3 3"
               strokeLinecap="round"
             />
             <path
-              d="M3 33L7 40L11 33"
+              d={hasStop ? "M3 77L7 84L11 77" : "M3 33L7 40L11 33"}
               stroke="#94a3b8"
               strokeWidth="2"
               strokeLinecap="round"
@@ -280,31 +292,118 @@ export default function BestRideApp() {
         {/* Divisória sutil */}
         <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
 
-        {/* Linha 2: Destino */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' }}>
-          <div style={{
-            width: '14px',
-            height: '14px',
-            borderRadius: '50%',
-            backgroundColor: '#ef4444',
-            boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)',
-            flexShrink: 0
-          }} />
-          <input
-            type="text"
-            value={destinationAddress}
-            onChange={(e) => setDestinationAddress(e.target.value)}
-            placeholder="Para onde você quer ir?"
-            style={{
-              width: '100%',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              fontSize: '14px',
-              fontWeight: '600',
-              color: '#0f172a'
-            }}
-          />
+        {/* Linha Intermediária: Parada Opcional */}
+        {hasStop && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+                <div style={{
+                  width: '14px',
+                  height: '14px',
+                  borderRadius: '50%',
+                  backgroundColor: '#f59e0b',
+                  boxShadow: '0 0 0 3px rgba(245, 158, 11, 0.2)',
+                  flexShrink: 0
+                }} />
+                <input
+                  type="text"
+                  autoFocus
+                  value={stopAddress}
+                  onChange={(e) => setStopAddress(e.target.value)}
+                  placeholder="Parada intermediária (ex: Faculdade)"
+                  style={{
+                    width: '100%',
+                    border: 'none',
+                    outline: 'none',
+                    background: 'transparent',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#0f172a'
+                  }}
+                />
+              </div>
+
+              <button
+                onClick={() => {
+                  setHasStop(false)
+                  setStopAddress('')
+                }}
+                title="Remover parada"
+                style={{
+                  border: 'none',
+                  backgroundColor: '#fee2e2',
+                  color: '#ef4444',
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '6px',
+                  fontSize: '11px',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
+          </>
+        )}
+
+        {/* Linha 2 / Final: Destino */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+            <div style={{
+              width: '14px',
+              height: '14px',
+              borderRadius: '50%',
+              backgroundColor: '#ef4444',
+              boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)',
+              flexShrink: 0
+            }} />
+            <input
+              type="text"
+              value={destinationAddress}
+              onChange={(e) => setDestinationAddress(e.target.value)}
+              placeholder="Para onde você quer ir?"
+              style={{
+                width: '100%',
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#0f172a'
+              }}
+            />
+          </div>
+
+          {/* Botão sutil de adicionar parada (caso ainda não tenha adicionado) */}
+          {!hasStop && (
+            <button
+              onClick={() => setHasStop(true)}
+              style={{
+                border: 'none',
+                backgroundColor: '#f8fafc',
+                borderWidth: '1px',
+                borderColor: '#e2e8f0',
+                borderStyle: 'solid',
+                color: '#044e42',
+                padding: '4px 8px',
+                borderRadius: '8px',
+                fontSize: '11px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}
+            >
+              + Parada
+            </button>
+          )}
         </div>
       </div>
 
