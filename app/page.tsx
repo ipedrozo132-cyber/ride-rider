@@ -8,28 +8,54 @@ export default function RideRiderPOC() {
   const destLat = '-23.1896'
   const destLng = '-45.8841'
 
-  // Universal Link Uber (abre direto o app oficial ou cai na tela com destino preenchido)
-  const uberHref = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodeURIComponent(destinationName)}`
+  // Deep Link nativo do Uber com fallback universal
+  const handleUberClick = () => {
+    const encodedName = encodeURIComponent(destinationName)
+    const nativeUberUrl = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}`
+    const webUberUrl = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}`
+    
+    // Tenta protocolo nativo do app; se não responder em 1s, vai pelo link web
+    const start = Date.now()
+    window.location.href = nativeUberUrl
+    setTimeout(() => {
+      if (Date.now() - start < 1500) {
+        window.location.href = webUberUrl
+      }
+    }, 1000)
+  }
 
-  // Universal / Intent Link 99 para Android e iOS
-  const didiHref = `https://page.didiglobal.com/passenger/index.html?dest_lat=${destLat}&dest_lng=${destLng}&dest_name=${encodeURIComponent(destinationName)}`
+  // Deep Link nativo da 99
+  const handle99Click = () => {
+    const encodedName = encodeURIComponent(destinationName)
+    const native99Url = `taxis99://call?lat=${destLat}&lng=${destLng}&name=${encodedName}`
+    const web99Url = `https://page.didiglobal.com/passenger/index.html?dest_lat=${destLat}&dest_lng=${destLng}&dest_name=${encodedName}`
+    
+    const start = Date.now()
+    window.location.href = native99Url
+    setTimeout(() => {
+      if (Date.now() - start < 1500) {
+        window.location.href = web99Url
+      }
+    }, 1000)
+  }
 
   return (
     <main style={{
-      minHeight: '100vh',
+      minHeight: '100dvh',
+      boxSizing: 'border-box',
       backgroundColor: '#0a0d14',
       color: '#f8fafc',
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      padding: '24px 16px',
+      padding: '16px',
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
       maxWidth: '480px',
       margin: '0 auto'
     }}>
-      {/* Cabeçalho */}
+      {/* Topo */}
       <div>
-        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+        <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Zap size={22} color="#00E676" />
@@ -37,7 +63,7 @@ export default function RideRiderPOC() {
                 RIDE<span style={{ color: '#00E676' }}>RIDER</span>
               </h1>
             </div>
-            <p style={{ fontSize: '12px', color: '#64748b', margin: '4px 0 0 0' }}>
+            <p style={{ fontSize: '12px', color: '#64748b', margin: '2px 0 0 0' }}>
               Comparador de Tarifas & Despacho Imediato
             </p>
           </div>
@@ -46,11 +72,11 @@ export default function RideRiderPOC() {
             backgroundColor: 'rgba(0, 230, 118, 0.1)',
             color: '#00E676',
             border: '1px solid rgba(0, 230, 118, 0.3)',
-            padding: '4px 8px',
+            padding: '3px 8px',
             borderRadius: '12px',
             fontWeight: '600'
           }}>
-            POC v0.2
+            POC v0.3
           </span>
         </header>
 
@@ -58,16 +84,16 @@ export default function RideRiderPOC() {
         <div style={{
           backgroundColor: '#131823',
           border: '1px solid #1e293b',
-          borderRadius: '16px',
-          padding: '16px',
-          marginBottom: '20px'
+          borderRadius: '14px',
+          padding: '14px',
+          marginBottom: '16px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: '#00E676' }} />
-            <span style={{ fontSize: '13px', color: '#94a3b8' }}>Partida: <strong>Minha localização atual (GPS)</strong></span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+            <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#00E676' }} />
+            <span style={{ fontSize: '12px', color: '#94a3b8' }}>Partida: <strong>Minha localização atual (GPS)</strong></span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Navigation size={14} color="#38bdf8" />
             <input
               type="text"
@@ -79,7 +105,7 @@ export default function RideRiderPOC() {
                 backgroundColor: '#0a0d14',
                 border: '1px solid #334155',
                 borderRadius: '8px',
-                padding: '8px 12px',
+                padding: '8px 10px',
                 color: '#fff',
                 fontSize: '13px',
                 outline: 'none'
@@ -88,60 +114,59 @@ export default function RideRiderPOC() {
           </div>
         </div>
 
-        {/* Comparador de Preços */}
-        <h2 style={{ fontSize: '13px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '12px' }}>
+        {/* Lista de Opções */}
+        <h2 style={{ fontSize: '11px', textTransform: 'uppercase', color: '#64748b', letterSpacing: '0.05em', marginBottom: '10px' }}>
           Melhores Opções em Tempo Real
         </h2>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {/* Card 99 */}
           <div style={{
             backgroundColor: '#131823',
             border: '1px solid #22c55e',
-            borderRadius: '16px',
-            padding: '16px',
+            borderRadius: '14px',
+            padding: '12px 14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontWeight: '700', fontSize: '15px' }}>99 Pop</span>
+                <span style={{ fontWeight: '700', fontSize: '14px' }}>99 Pop</span>
                 <span style={{
                   fontSize: '9px',
                   backgroundColor: 'rgba(34, 197, 94, 0.2)',
                   color: '#22c55e',
-                  padding: '2px 6px',
-                  borderRadius: '6px',
+                  padding: '1px 5px',
+                  borderRadius: '4px',
                   fontWeight: '700'
                 }}>
                   MAIS BARATO
                 </span>
               </div>
-              <span style={{ fontSize: '12px', color: '#94a3b8' }}>Chegada estimada: 3-5 min</span>
+              <span style={{ fontSize: '11px', color: '#94a3b8' }}>Chegada estimada: 3-5 min</span>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '18px', fontWeight: '800', color: '#22c55e' }}>R$ 7,80</div>
-              <a
-                href={didiHref}
-                target="_blank"
-                rel="noopener noreferrer"
+              <div style={{ fontSize: '16px', fontWeight: '800', color: '#22c55e' }}>R$ 7,80</div>
+              <button
+                onClick={handle99Click}
                 style={{
-                  marginTop: '6px',
+                  marginTop: '4px',
                   backgroundColor: '#22c55e',
                   color: '#000',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
+                  border: 'none',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
                   fontSize: '12px',
                   fontWeight: '700',
-                  textDecoration: 'none',
+                  cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}
               >
                 Pedir 99 <ArrowRight size={12} />
-              </a>
+              </button>
             </div>
           </div>
 
@@ -149,66 +174,64 @@ export default function RideRiderPOC() {
           <div style={{
             backgroundColor: '#131823',
             border: '1px solid #1e293b',
-            borderRadius: '16px',
-            padding: '16px',
+            borderRadius: '14px',
+            padding: '12px 14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between'
           }}>
             <div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ fontWeight: '700', fontSize: '15px' }}>UberX</span>
+                <span style={{ fontWeight: '700', fontSize: '14px' }}>UberX</span>
               </div>
-              <span style={{ fontSize: '12px', color: '#94a3b8' }}>Chegada estimada: 2 min</span>
+              <span style={{ fontSize: '11px', color: '#94a3b8' }}>Chegada estimada: 2 min</span>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '18px', fontWeight: '800', color: '#f8fafc' }}>R$ 14,20</div>
-              <a
-                href={uberHref}
-                target="_blank"
-                rel="noopener noreferrer"
+              <div style={{ fontSize: '16px', fontWeight: '800', color: '#f8fafc' }}>R$ 14,20</div>
+              <button
+                onClick={handleUberClick}
                 style={{
-                  marginTop: '6px',
+                  marginTop: '4px',
                   backgroundColor: '#1e293b',
                   color: '#fff',
                   border: '1px solid #334155',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
+                  borderRadius: '6px',
+                  padding: '6px 12px',
                   fontSize: '12px',
                   fontWeight: '700',
-                  textDecoration: 'none',
+                  cursor: 'pointer',
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '4px'
                 }}
               >
                 Pedir Uber <ArrowRight size={12} />
-              </a>
+              </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Rodapé com Assinatura Oficial */}
+      {/* Rodapé Compacto */}
       <footer style={{
-        marginTop: '36px',
+        marginTop: '20px',
         textAlign: 'center',
         borderTop: '1px solid #1e293b',
-        paddingTop: '20px'
+        paddingTop: '12px'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#64748b', fontSize: '11px', marginBottom: '8px' }}>
-          <ShieldCheck size={14} color="#00E676" />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', color: '#64748b', fontSize: '11px', marginBottom: '6px' }}>
+          <ShieldCheck size={13} color="#00E676" />
           <span>Deep Link Seguro • Sem intermediação financeira</span>
         </div>
         <p style={{
-          fontSize: '10px',
+          fontSize: '9px',
           color: '#475569',
-          letterSpacing: '0.06em',
+          letterSpacing: '0.05em',
           textTransform: 'uppercase',
           margin: 0,
           fontWeight: '600'
         }}>
-          © 2026 Infinite Intelligence Labs • All Rights Reserved
+          © 2026 INFINITE INTELLIGENCE LABS • ALL RIGHTS RESERVED
         </p>
       </footer>
     </main>
