@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 // Logotipo Proprietário B do Best Ride
 const BestRideBrand = () => (
@@ -102,11 +102,24 @@ const TitaniumCoin = () => (
   </div>
 )
 
+// Locais padrão iniciais para agilidade
+const DEFAULT_SAVED_PLACES = [
+  'Faculdade Ellen',
+  'Praça Afonso Pena',
+  'Avenida José Longo',
+  'Casa',
+  'CenterVale Shopping'
+]
+
 export default function BestRideApp() {
   const [isUsingGps, setIsUsingGps] = useState(true)
   const [manualPickup, setManualPickup] = useState('')
   const [stops, setStops] = useState<string[]>([])
   const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
+
+  // Controle de locais memorizados no aparelho
+  const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_SAVED_PLACES)
+  const [activeField, setActiveField] = useState<'pickup' | 'destination' | number | null>(null)
 
   const [isComparing, setIsComparing] = useState(false)
   const [hasCompared, setHasCompared] = useState(false)
@@ -114,30 +127,67 @@ export default function BestRideApp() {
   const [priceUber, setPriceUber] = useState<string | null>(null)
   const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string } | null>(null)
 
-  // Coordenadas padrão de apoio
-  const pickupLat = '-23.2055'
-  const pickupLng = '-45.8841'
-  const destLat = '-23.1896'
-  const destLng = '-45.8841'
+  // Carrega histórico memorizado localmente ao abrir
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('best_ride_saved_places')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSavedPlaces(parsed)
+        }
+      }
+    } catch {
+      // Navegador em modo privado ou suporte desabilitado
+    }
+  }, [])
+
+  // Guarda novos locais frequentemente usados
+  const savePlaceToHistory = (place: string) => {
+    const trimmed = place.trim()
+    if (!trimmed || trimmed === 'Minha localização atual (GPS)') return
+    setSavedPlaces(prev => {
+      const updated = [trimmed, ...prev.filter(p => p.toLowerCase() !== trimmed.toLowerCase())].slice(0, 7)
+      try {
+        localStorage.setItem('best_ride_saved_places', JSON.stringify(updated))
+      } catch {}
+      return updated
+    })
+  }
+
+  const selectSuggestedPlace = (place: string) => {
+    if (activeField === 'pickup') {
+      setManualPickup(place)
+    } else if (activeField === 'destination') {
+      setDestinationAddress(place)
+    } else if (typeof activeField === 'number') {
+      updateStop(activeField, place)
+    }
+    setActiveField(null)
+  }
 
   const toggleGpsMode = () => {
     if (isUsingGps) {
       setIsUsingGps(false)
       setManualPickup('')
+      setActiveField('pickup')
     } else {
       setIsUsingGps(true)
       setManualPickup('')
+      setActiveField(null)
     }
   }
 
   const addStop = () => {
     if (stops.length < 2) {
       setStops([...stops, ''])
+      setActiveField(stops.length)
     }
   }
 
   const removeStop = (index: number) => {
     setStops(stops.filter((_, i) => i !== index))
+    if (activeField === index) setActiveField(null)
   }
 
   const updateStop = (index: number, value: string) => {
@@ -148,6 +198,13 @@ export default function BestRideApp() {
 
   const handleCompare = () => {
     setIsComparing(true)
+
+    // Grava automaticamente os locais preenchidos no histórico
+    if (!isUsingGps && manualPickup) savePlaceToHistory(manualPickup)
+    if (destinationAddress) savePlaceToHistory(destinationAddress)
+    stops.forEach(s => { if (s) savePlaceToHistory(s) })
+    setActiveField(null)
+
     setTimeout(() => {
       if (stops.length === 2) {
         setPrice99('R$ 16,90')
@@ -184,18 +241,17 @@ export default function BestRideApp() {
       ? 'pickup=my_location'
       : `pickup[formatted_address]=${encodedPickup}&pickup[nickname]=${encodedPickup}`
 
-    const nativeUri = `uber://?action=setPickup&${pickupParam}&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedDest}&dropoff[formatted_address]=${encodedDest}`
+    const nativeUri = `uber://?action=setPickup&${pickupParam}&dropoff[latitude]=-23.1896&dropoff[longitude]=-45.8841&dropoff[nickname]=${encodedDest}&dropoff[formatted_address]=${encodedDest}`
     window.location.assign(nativeUri)
   }
 
   const handle99Click = () => {
     const encodedDest = encodeURIComponent(destinationAddress)
     const pickupTitle = encodeURIComponent(isUsingGps ? 'Minha Localização' : manualPickup)
-    const native99Uri = `taxis99://call?pickup_latitude=${pickupLat}&pickup_longitude=${pickupLng}&pickup_title=${pickupTitle}&dropoff_latitude=${destLat}&dropoff_longitude=${destLng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
+    const native99Uri = `taxis99://call?pickup_latitude=-23.2055&pickup_longitude=-45.8841&pickup_title=${pickupTitle}&dropoff_latitude=-23.1896&dropoff_longitude=-45.8841&dropoff_title=${encodedDest}&deep_link_product_id=316`
     window.location.assign(native99Uri)
   }
 
-  // Altura proporcional para a rota conforme o número de paradas
   const svgHeight = stops.length === 2 ? 132 : stops.length === 1 ? 88 : 44
   const lineY2 = stops.length === 2 ? 122 : stops.length === 1 ? 78 : 34
   const arrowY = stops.length === 2 ? 121 : stops.length === 1 ? 77 : 33
@@ -280,6 +336,7 @@ export default function BestRideApp() {
                 type="text"
                 autoFocus
                 value={manualPickup}
+                onFocus={() => setActiveField('pickup')}
                 onChange={(e) => setManualPickup(e.target.value)}
                 placeholder="Ex: Faculdade, Rodoviária..."
                 style={{
@@ -318,7 +375,7 @@ export default function BestRideApp() {
 
         <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
 
-        {/* Paradas Intermediárias (Até 2 paradas) */}
+        {/* Paradas Intermediárias */}
         {stops.map((stop, index) => (
           <React.Fragment key={index}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
@@ -335,6 +392,7 @@ export default function BestRideApp() {
                   type="text"
                   autoFocus={index === stops.length - 1}
                   value={stop}
+                  onFocus={() => setActiveField(index)}
                   onChange={(e) => updateStop(index, e.target.value)}
                   placeholder={`Parada ${index + 1} (ex: Faculdade, Restaurante...)`}
                   style={{
@@ -388,6 +446,7 @@ export default function BestRideApp() {
             <input
               type="text"
               value={destinationAddress}
+              onFocus={() => setActiveField('destination')}
               onChange={(e) => setDestinationAddress(e.target.value)}
               placeholder="Para onde você quer ir?"
               style={{
@@ -402,7 +461,6 @@ export default function BestRideApp() {
             />
           </div>
 
-          {/* Permite adicionar até 2 paradas */}
           {stops.length < 2 && (
             <button
               onClick={addStop}
@@ -429,6 +487,54 @@ export default function BestRideApp() {
           )}
         </div>
       </div>
+
+      {/* Sugestões Rápidas de Locais Frequentes (Aparece ao focar no campo) */}
+      {activeField !== null && (
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '14px',
+          border: '1px solid #e2e8f0',
+          padding: '10px 12px',
+          marginBottom: '14px',
+          boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <span style={{ fontSize: '11.5px', fontWeight: '750', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              ⚡ Sugestões Rápidas (Toque para preencher)
+            </span>
+            <button
+              onClick={() => setActiveField(null)}
+              style={{ background: 'none', border: 'none', fontSize: '11px', color: '#94a3b8', cursor: 'pointer', fontWeight: 'bold' }}
+            >
+              Fechar ✕
+            </button>
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {savedPlaces.map((place, idx) => (
+              <button
+                key={idx}
+                onClick={() => selectSuggestedPlace(place)}
+                style={{
+                  backgroundColor: '#f1f5f9',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '8px',
+                  padding: '6px 10px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  color: '#1e293b',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '5px'
+                }}
+              >
+                <span>📍</span>
+                <span>{place}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Cápsula Informativa: Distância + Tempo */}
       {hasCompared && tripTelemetry && (
