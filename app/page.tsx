@@ -8,35 +8,32 @@ export default function RideRiderPOC() {
   const destLat = '-23.1896'
   const destLng = '-45.8841'
 
-  // Deep Link nativo do Uber com fallback universal
+  // Disparo Uber com Intent específico do Android
   const handleUberClick = () => {
     const encodedName = encodeURIComponent(destinationName)
-    const nativeUberUrl = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}`
-    const webUberUrl = `https://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}`
-    
-    // Tenta protocolo nativo do app; se não responder em 1s, vai pelo link web
-    const start = Date.now()
-    window.location.href = nativeUberUrl
-    setTimeout(() => {
-      if (Date.now() - start < 1500) {
-        window.location.href = webUberUrl
-      }
-    }, 1000)
+    const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent)
+
+    if (isAndroid) {
+      // Intent nativo que força o app da Uber a abrir sem passar pela Play Store
+      const androidIntent = `intent://m.uber.com/ul/?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}#Intent;scheme=https;package=com.ubercab;end`
+      window.location.href = androidIntent
+    } else {
+      // iOS / Safari
+      window.location.href = `uber://?action=setPickup&pickup=my_location&dropoff[latitude]=${destLat}&dropoff[longitude]=${destLng}&dropoff[nickname]=${encodedName}`
+    }
   }
 
-  // Deep Link nativo da 99
+  // Disparo 99 com Intent específico do Android
   const handle99Click = () => {
     const encodedName = encodeURIComponent(destinationName)
-    const native99Url = `taxis99://call?lat=${destLat}&lng=${destLng}&name=${encodedName}`
-    const web99Url = `https://page.didiglobal.com/passenger/index.html?dest_lat=${destLat}&dest_lng=${destLng}&dest_name=${encodedName}`
-    
-    const start = Date.now()
-    window.location.href = native99Url
-    setTimeout(() => {
-      if (Date.now() - start < 1500) {
-        window.location.href = web99Url
-      }
-    }, 1000)
+    const isAndroid = typeof navigator !== 'undefined' && /android/i.test(navigator.userAgent)
+
+    if (isAndroid) {
+      const android99Intent = `intent://page.didiglobal.com/passenger/index.html?dest_lat=${destLat}&dest_lng=${destLng}&dest_name=${encodedName}#Intent;scheme=taxis99;package=com.taxis99;end`
+      window.location.href = android99Intent
+    } else {
+      window.location.href = `taxis99://call?lat=${destLat}&lng=${destLng}&name=${encodedName}`
+    }
   }
 
   return (
@@ -53,7 +50,6 @@ export default function RideRiderPOC() {
       maxWidth: '480px',
       margin: '0 auto'
     }}>
-      {/* Topo */}
       <div>
         <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
           <div>
@@ -76,7 +72,7 @@ export default function RideRiderPOC() {
             borderRadius: '12px',
             fontWeight: '600'
           }}>
-            POC v0.3
+            POC v0.4
           </span>
         </header>
 
@@ -212,7 +208,6 @@ export default function RideRiderPOC() {
         </div>
       </div>
 
-      {/* Rodapé Compacto */}
       <footer style={{
         marginTop: '20px',
         textAlign: 'center',
