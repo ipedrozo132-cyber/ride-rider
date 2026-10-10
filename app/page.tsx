@@ -4,8 +4,8 @@ import React, { useState } from 'react'
 
 // Logotipo Proprietário B do Best Ride
 const BestRideBrand = () => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '28px' }}>
-    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 168, 107, 0.15))' }}>
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
+    <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 168, 107, 0.15))' }}>
       <path
         d="M20 10C20 10 37 10 42 16.5C46.5 22.5 40 28.5 32 29.5C43.5 30.5 48 37.5 43.5 45.5C39 52.5 24 52.5 20 52.5C15 52.5 13.5 49 13.5 45C13.5 39.5 18 35 29 35C40 35 42.5 29.5 37.5 26C33 22.5 20 22.5 20 22.5"
         stroke="#00E676"
@@ -37,18 +37,18 @@ const BestRideBrand = () => (
       <circle cx="29" cy="35" r="2.5" fill="#38bdf8" />
     </svg>
     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-      <span style={{ fontSize: '28px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.03em' }}>BEST</span>
-      <span style={{ fontSize: '28px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.03em', marginTop: '3px' }}>RIDE</span>
+      <span style={{ fontSize: '27px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.03em' }}>BEST</span>
+      <span style={{ fontSize: '27px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.03em', marginTop: '3px' }}>RIDE</span>
     </div>
   </div>
 )
 
 // Moeda de Titânio i^∞ Ampliada
 const TitaniumCoin = () => (
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: '32px' }}>
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: '28px' }}>
     <div style={{
-      width: '58px',
-      height: '58px',
+      width: '56px',
+      height: '56px',
       borderRadius: '50%',
       background: 'radial-gradient(circle at 30% 30%, #ffffff 0%, #e2e8f0 25%, #cbd5e1 45%, #94a3b8 70%, #475569 95%, #1e293b 100%)',
       boxShadow: '0 6px 14px rgba(0,0,0,0.22), inset 0 2.5px 2px rgba(255,255,255,0.9), inset 0 -3px 4px rgba(0,0,0,0.5)',
@@ -68,7 +68,7 @@ const TitaniumCoin = () => (
         background: 'repeating-radial-gradient(circle, transparent, transparent 2px, rgba(255,255,255,0.05) 3px, rgba(0,0,0,0.03) 4px)'
       }} />
       <span style={{
-        fontSize: '25px',
+        fontSize: '24px',
         fontFamily: 'Georgia, serif',
         fontStyle: 'italic',
         fontWeight: 'bold',
@@ -103,7 +103,8 @@ const TitaniumCoin = () => (
 )
 
 export default function BestRideApp() {
-  const [pickupAddress, setPickupAddress] = useState('Minha localização atual (GPS)')
+  const [isUsingGps, setIsUsingGps] = useState(true)
+  const [manualPickup, setManualPickup] = useState('')
   const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
 
   // Coordenadas padrão de apoio
@@ -112,15 +113,21 @@ export default function BestRideApp() {
   const destLat = '-23.1896'
   const destLng = '-45.8841'
 
-  // Verifica se o usuário manteve o GPS ou digitou outro local
-  const isGpsDefault = pickupAddress.includes('(GPS)') || pickupAddress.trim().toLowerCase() === 'minha localização atual'
+  const toggleGpsMode = () => {
+    if (isUsingGps) {
+      setIsUsingGps(false)
+      setManualPickup('')
+    } else {
+      setIsUsingGps(true)
+      setManualPickup('')
+    }
+  }
 
   const handleUberClick = () => {
     const encodedDest = encodeURIComponent(destinationAddress)
-    const encodedPickup = encodeURIComponent(pickupAddress)
+    const encodedPickup = encodeURIComponent(isUsingGps ? 'Minha Localização' : manualPickup)
 
-    // Se for GPS, usa my_location; se digitou outro endereço, passa o endereço digitado
-    const pickupParam = isGpsDefault
+    const pickupParam = isUsingGps
       ? 'pickup=my_location'
       : `pickup[formatted_address]=${encodedPickup}&pickup[nickname]=${encodedPickup}`
 
@@ -130,8 +137,8 @@ export default function BestRideApp() {
 
   const handle99Click = () => {
     const encodedDest = encodeURIComponent(destinationAddress)
-    const encodedPickup = encodeURIComponent(pickupAddress)
-    const native99Uri = `taxis99://call?pickup_latitude=${pickupLat}&pickup_longitude=${pickupLng}&pickup_title=${encodedPickup}&dropoff_latitude=${destLat}&dropoff_longitude=${destLng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
+    const pickupTitle = encodeURIComponent(isUsingGps ? 'Minha Localização' : manualPickup)
+    const native99Uri = `taxis99://call?pickup_latitude=${pickupLat}&pickup_longitude=${pickupLng}&pickup_title=${pickupTitle}&dropoff_latitude=${destLat}&dropoff_longitude=${destLng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
     window.location.assign(native99Uri)
   }
 
@@ -151,60 +158,112 @@ export default function BestRideApp() {
       {/* Logotipo Superior */}
       <BestRideBrand />
 
-      {/* Trajeto com Linha Tracejada */}
+      {/* Caixa de Trajeto */}
       <div style={{
         backgroundColor: '#ffffff',
-        borderRadius: '16px',
+        borderRadius: '18px',
         border: '1px solid #e2e8f0',
         padding: '16px 14px',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        marginBottom: '22px',
+        boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
+        marginBottom: '20px',
         position: 'relative'
       }}>
-        {/* Linha vertical conectando os pontos */}
+        {/* Linha vertical tracejada com seta apontando para baixo */}
         <div style={{
           position: 'absolute',
-          left: '26px',
-          top: '32px',
-          bottom: '32px',
-          width: '2px',
-          borderLeft: '2.5px dashed #cbd5e1'
-        }} />
+          left: '20px',
+          top: '34px',
+          bottom: '36px',
+          width: '14px',
+          display: 'flex',
+          justifyContent: 'center',
+          pointerEvents: 'none'
+        }}>
+          <svg width="12" height="100%" viewBox="0 0 12 40" preserveAspectRatio="none" fill="none">
+            {/* Linha tracejada suave */}
+            <line
+              x1="6"
+              y1="0"
+              x2="6"
+              y2="32"
+              stroke="#94a3b8"
+              strokeWidth="2"
+              strokeDasharray="3 3"
+              strokeLinecap="round"
+            />
+            {/* Ponta da seta apontando para o ponto vermelho */}
+            <path
+              d="M3 31L6 37L9 31"
+              stroke="#94a3b8"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
 
-        {/* Ponto de Partida Flexível */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '14px', position: 'relative' }}>
-          <div style={{
-            width: '12px',
-            height: '12px',
-            borderRadius: '50%',
-            backgroundColor: '#10b981',
-            boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.2)',
-            flexShrink: 0
-          }} />
-          <input
-            type="text"
-            value={pickupAddress}
-            onChange={(e) => setPickupAddress(e.target.value)}
-            onFocus={() => {
-              if (isGpsDefault) setPickupAddress('')
-            }}
-            placeholder="Digite o local de partida (ex: Faculdade)"
+        {/* Linha 1: Ponto de Partida + Botão Alternador */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+            <div style={{
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: isUsingGps ? '#10b981' : '#38bdf8',
+              boxShadow: isUsingGps ? '0 0 0 3px rgba(16, 185, 129, 0.2)' : '0 0 0 3px rgba(56, 189, 248, 0.2)',
+              flexShrink: 0
+            }} />
+            
+            {isUsingGps ? (
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>
+                Minha localização atual (GPS)
+              </span>
+            ) : (
+              <input
+                type="text"
+                autoFocus
+                value={manualPickup}
+                onChange={(e) => setManualPickup(e.target.value)}
+                placeholder="Ex: Faculdade, Rodoviária..."
+                style={{
+                  width: '100%',
+                  border: 'none',
+                  outline: 'none',
+                  background: 'transparent',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#0f172a'
+                }}
+              />
+            )}
+          </div>
+
+          {/* Botão de Alternância */}
+          <button
+            onClick={toggleGpsMode}
             style={{
-              width: '100%',
               border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              fontSize: '14px',
-              fontWeight: '550',
-              color: '#334155'
+              backgroundColor: isUsingGps ? '#f1f5f9' : '#ecfdf5',
+              color: isUsingGps ? '#475569' : '#059669',
+              padding: '5px 9px',
+              borderRadius: '8px',
+              fontSize: '11px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
             }}
-          />
+          >
+            {isUsingGps ? '✏️ Alterar' : '🎯 Meu GPS'}
+          </button>
         </div>
 
         {/* Divisória sutil */}
         <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '26px', marginBottom: '14px' }} />
 
-        {/* Destino */}
+        {/* Linha 2: Ponto de Destino */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '14px', position: 'relative' }}>
           <div style={{
             width: '12px',
@@ -218,7 +277,7 @@ export default function BestRideApp() {
             type="text"
             value={destinationAddress}
             onChange={(e) => setDestinationAddress(e.target.value)}
-            placeholder="Para onde vamos?"
+            placeholder="Para onde você quer ir?"
             style={{
               width: '100%',
               border: 'none',
@@ -249,7 +308,6 @@ export default function BestRideApp() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '10px',
-            transition: 'transform 0.1s ease',
             outline: 'none'
           }}
         >
@@ -285,7 +343,6 @@ export default function BestRideApp() {
             alignItems: 'center',
             justifyContent: 'center',
             gap: '10px',
-            transition: 'transform 0.1s ease',
             outline: 'none'
           }}
         >
