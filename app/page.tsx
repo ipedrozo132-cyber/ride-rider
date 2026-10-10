@@ -183,7 +183,7 @@ export default function BestRideApp() {
         marginBottom: '16px',
         position: 'relative'
       }}>
-        {/* Linha vertical tracejada saindo do centro verde até a borda vermelha */}
+        {/* Linha vertical tracejada alinhada ao centro dos círculos */}
         <div style={{
           position: 'absolute',
           left: '14px',
@@ -195,7 +195,6 @@ export default function BestRideApp() {
           pointerEvents: 'none'
         }}>
           <svg width="14" height="100%" viewBox="0 0 14 50" preserveAspectRatio="none" fill="none">
-            {/* Traçado alinhado exatamente ao centro dos pontos (x = 7) */}
             <line
               x1="7"
               y1="0"
@@ -206,7 +205,6 @@ export default function BestRideApp() {
               strokeDasharray="3 3"
               strokeLinecap="round"
             />
-            {/* Ponta da seta tocando a borda superior do ponto de destino */}
             <path
               d="M3 41L7 49L11 41"
               stroke="#94a3b8"
@@ -305,38 +303,6 @@ export default function BestRideApp() {
         </div>
       </div>
 
-      {/* Botão de Comparar / Atualizar */}
-      <button
-        onClick={handleCompare}
-        disabled={isComparing}
-        style={{
-          width: '100%',
-          backgroundColor: hasCompared ? '#0f172a' : '#044e42',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '14px',
-          padding: '13px 16px',
-          fontSize: '14px',
-          fontWeight: '700',
-          cursor: isComparing ? 'wait' : 'pointer',
-          marginBottom: '18px',
-          boxShadow: '0 4px 12px rgba(4, 78, 66, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          transition: 'all 0.2s ease'
-        }}
-      >
-        {isComparing ? (
-          'Buscando tarifas...'
-        ) : hasCompared ? (
-          '🔄 Atualizar Tarifas'
-        ) : (
-          '🔍 Comparar Tarifas'
-        )}
-      </button>
-
       {/* Cards Lado a Lado (99 e Uber) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '16px' }}>
         {/* Card 99 */}
@@ -355,13 +321,12 @@ export default function BestRideApp() {
             justifyContent: 'center',
             gap: '8px',
             outline: 'none',
-            minHeight: '92px'
+            minHeight: '94px'
           }}
         >
-          {/* Logo 99 Maior e em destaque */}
           <div style={{
-            width: '52px',
-            height: '38px',
+            width: '54px',
+            height: '40px',
             backgroundColor: '#ffc107',
             borderRadius: '12px',
             display: 'flex',
@@ -369,10 +334,10 @@ export default function BestRideApp() {
             justifyContent: 'center',
             boxShadow: '0 2px 5px rgba(0,0,0,0.08)'
           }}>
-            <span style={{ fontSize: '22px', fontWeight: '950', color: '#000', letterSpacing: '-0.05em' }}>99</span>
+            <span style={{ fontSize: '23px', fontWeight: '950', color: '#000', letterSpacing: '-0.05em' }}>99</span>
           </div>
           {hasCompared && (
-            <span style={{ fontSize: '14px', fontWeight: '800', color: '#044e42' }}>
+            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
               {price99}
             </span>
           )}
@@ -394,22 +359,53 @@ export default function BestRideApp() {
             justifyContent: 'center',
             gap: '8px',
             outline: 'none',
-            minHeight: '92px'
+            minHeight: '94px'
           }}
         >
-          {/* Marca UberX Maior e limpa */}
-          <div style={{ height: '38px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '24px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em' }}>
+          <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '25px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em' }}>
               UberX
             </span>
           </div>
           {hasCompared && (
-            <span style={{ fontSize: '14px', fontWeight: '800', color: '#044e42' }}>
+            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
               {priceUber}
             </span>
           )}
         </button>
       </div>
+
+      {/* Botão de Comparar / Atualizar POSICIONADO ABAIXO DOS CARDS */}
+      <button
+        onClick={handleCompare}
+        disabled={isComparing}
+        style={{
+          width: '100%',
+          backgroundColor: hasCompared ? '#0f172a' : '#044e42',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '14px',
+          padding: '14px 16px',
+          fontSize: '15px',
+          fontWeight: '700',
+          cursor: isComparing ? 'wait' : 'pointer',
+          marginBottom: '16px',
+          boxShadow: '0 4px 12px rgba(4, 78, 66, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        {isComparing ? (
+          'Buscando tarifas...'
+        ) : hasCompared ? (
+          '🔄 Atualizar Tarifas'
+        ) : (
+          '🔍 Comparar Tarifas'
+        )}
+      </button>
 
       {/* Assinatura com Moeda de Titânio */}
       <TitaniumCoin />
