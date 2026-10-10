@@ -111,7 +111,7 @@ export default function BestRideApp() {
   const [hasCompared, setHasCompared] = useState(false)
   const [price99, setPrice99] = useState<string | null>(null)
   const [priceUber, setPriceUber] = useState<string | null>(null)
-  const [estimatedTripTime, setEstimatedTripTime] = useState<string | null>(null)
+  const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string } | null>(null)
 
   // Coordenadas padrão de apoio
   const pickupLat = '-23.2055'
@@ -134,7 +134,10 @@ export default function BestRideApp() {
     setTimeout(() => {
       setPrice99('R$ 7,80')
       setPriceUber('R$ 14,20')
-      setEstimatedTripTime('aproximadamente 12 a 15 min')
+      setTripTelemetry({
+        distance: 'aproximadamente 5,4 km',
+        time: '12 a 15 min'
+      })
       setHasCompared(true)
       setIsComparing(false)
     }, 600)
@@ -185,30 +188,30 @@ export default function BestRideApp() {
         marginBottom: '14px',
         position: 'relative'
       }}>
-        {/* Linha vertical tracejada com seta */}
+        {/* Linha vertical tracejada com controle de início e fim */}
         <div style={{
           position: 'absolute',
           left: '14px',
-          top: '25px',
-          bottom: '25px',
+          top: '32px',
+          bottom: '34px',
           width: '14px',
           display: 'flex',
           justifyContent: 'center',
           pointerEvents: 'none'
         }}>
-          <svg width="14" height="100%" viewBox="0 0 14 50" preserveAspectRatio="none" fill="none">
+          <svg width="14" height="100%" viewBox="0 0 14 44" preserveAspectRatio="none" fill="none">
             <line
               x1="7"
-              y1="0"
+              y1="2"
               x2="7"
-              y2="42"
+              y2="34"
               stroke="#94a3b8"
               strokeWidth="2"
               strokeDasharray="3 3"
               strokeLinecap="round"
             />
             <path
-              d="M3 41L7 49L11 41"
+              d="M3 33L7 40L11 33"
               stroke="#94a3b8"
               strokeWidth="2"
               strokeLinecap="round"
@@ -305,26 +308,23 @@ export default function BestRideApp() {
         </div>
       </div>
 
-      {/* Cápsula Informativa de Tempo de Trajeto (Aparece após comparar) */}
-      {hasCompared && (
+      {/* Cápsula Informativa: Distância + Tempo */}
+      {hasCompared && tripTelemetry && (
         <div style={{
           backgroundColor: '#f1f5f9',
           borderRadius: '12px',
-          padding: '8px 12px',
+          padding: '10px 14px',
           marginBottom: '14px',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '2px',
-          border: '1px solid #e2e8f0'
+          gap: '8px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: '700', color: '#1e293b' }}>
-            <span>⏱️ Viagem estimada:</span>
-            <span style={{ color: '#044e42' }}>{estimatedTripTime} de trajeto</span>
-          </div>
-          <span style={{ fontSize: '10px', color: '#64748b', fontWeight: '500' }}>
-            (tempo de espera pelo motorista a cargo de cada aplicativo)
+          <span style={{ fontSize: '13px' }}>📍</span>
+          <span style={{ fontSize: '12.5px', fontWeight: '600', color: '#1e293b' }}>
+            Percurso estimado: <strong style={{ color: '#044e42' }}>{tripTelemetry.distance}</strong> • <strong style={{ color: '#044e42' }}>{tripTelemetry.time}</strong>
           </span>
         </div>
       )}
@@ -401,7 +401,7 @@ export default function BestRideApp() {
         </button>
       </div>
 
-      {/* Botão de Comparar / Atualizar POSICIONADO ABAIXO DOS CARDS */}
+      {/* Botão de Comparar / Atualizar */}
       <button
         onClick={handleCompare}
         disabled={isComparing}
