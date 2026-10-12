@@ -688,3 +688,10 @@ export default function SmartRideApp() {
               }}
             >
               Compreendi e Concordo
+            </button>
+          </div>
+        </div>
+      )}
+    </main>
+  )
+}
