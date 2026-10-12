@@ -617,3 +617,53 @@ export default function SmartRideApp() {
             minHeight: '94px'
           }}
         >
+          <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <span style={{ fontSize: '25px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em' }}>
+              UberX
+            </span>
+          </div>
+          {hasCompared && (
+            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
+              {priceUber}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Botão de Comparação */}
+      <button
+        onClick={handleCompare}
+        disabled={isComparing}
+        style={{
+          width: '100%',
+          backgroundColor: hasCompared ? '#0f172a' : '#044e42',
+          color: '#ffffff',
+          border: 'none',
+          borderRadius: '14px',
+          padding: '14px 16px',
+          fontSize: '15px',
+          fontWeight: '700',
+          cursor: isComparing ? 'wait' : 'pointer',
+          marginBottom: '16px',
+          boxShadow: '0 4px 12px rgba(4, 78, 66, 0.2)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          transition: 'all 0.2s ease'
+        }}
+      >
+        {isComparing ? (
+          'Buscando tarifas...'
+        ) : hasCompared ? (
+          '🔄 Atualizar Tarifas'
+        ) : (
+          '🔍 Comparar Tarifas'
+        )}
+      </button>
+
+      {/* Assinatura com Moeda de Titânio */}
+      <TitaniumCoin />
+    </main>
+  )
+}
