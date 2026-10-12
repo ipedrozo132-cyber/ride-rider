@@ -26,7 +26,7 @@ const SmartRideBrand = () => (
   </div>
 )
 
-const TitaniumCoin = () => (
+const TitaniumCoin = ({ onOpenLegal }: { onOpenLegal: () => void }) => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: '28px' }}>
     <div style={{
       width: '56px',
@@ -72,10 +72,28 @@ const TitaniumCoin = () => (
     }}>
       Infinite Intelligence Labs
     </span>
+
+    <button
+      onClick={onOpenLegal}
+      style={{
+        background: 'none',
+        border: 'none',
+        color: '#00A86B',
+        fontSize: '10px',
+        fontWeight: '600',
+        textDecoration: 'underline',
+        cursor: 'pointer',
+        marginTop: '6px',
+        padding: '2px 6px'
+      }}
+    >
+      Aviso Legal & Isenção de Responsabilidade
+    </button>
+
     <span style={{
       fontSize: '9.5px',
       color: '#64748b',
-      marginTop: '6px',
+      marginTop: '4px',
       fontWeight: '550',
       letterSpacing: '0.02em'
     }}>
@@ -113,6 +131,7 @@ export default function SmartRideApp() {
   const [priceUber, setPriceUber] = useState<string | null>(null)
   const [cheaperService, setCheaperService] = useState<'99' | 'uber' | null>(null)
   const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string; isRush: boolean } | null>(null)
+  const [showLegalModal, setShowLegalModal] = useState(false)
 
   useEffect(() => {
     if (isUsingGps && typeof window !== 'undefined' && 'geolocation' in navigator) {
@@ -217,22 +236,19 @@ export default function SmartRideApp() {
     const finalKm = parseFloat((totalKm + stopDistance).toFixed(1))
     const finalMin = totalMinutes + stopTime
 
-    // Detecta Horário de Pico (Rush) baseado no horário local do aparelho
     const now = new Date()
     const currentHour = now.getHours() + now.getMinutes() / 60
-    const dayOfWeek = now.getDay() // 0 = Domingo, 6 = Sábado
+    const dayOfWeek = now.getDay()
 
     const isMorningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 7.0 && currentHour <= 9.5
     const isEveningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 17.0 && currentHour <= 19.5
     const isNightSurge = (dayOfWeek === 5 || dayOfWeek === 6) && (currentHour >= 22.0 || currentHour <= 4.0)
     const isRushHour = isMorningRush || isEveningRush || isNightSurge
 
-    // Fator dinâmico realista de mercado
     const baseSurge = isRushHour ? 1.25 + Math.random() * 0.18 : 1.0 + Math.random() * 0.08
     const surgeUber = baseSurge * (1 + (Math.random() * 0.08 - 0.04))
     const surge99 = baseSurge * (1 + (Math.random() * 0.08 - 0.04))
 
-    // Fórmulas calibradas com bandeirada real e tarifas mínimas atualizadas
     const calcUber = Math.max(9.90, (5.20 + finalKm * 1.85 + finalMin * 0.35) * surgeUber)
     const calc99 = Math.max(9.20, (4.80 + finalKm * 1.70 + finalMin * 0.30) * surge99)
 
@@ -284,7 +300,8 @@ export default function SmartRideApp() {
       display: 'flex',
       flexDirection: 'column',
       maxWidth: '430px',
-      margin: '0 auto'
+      margin: '0 auto',
+      position: 'relative'
     }}>
       <SmartRideBrand />
 
@@ -590,7 +607,7 @@ export default function SmartRideApp() {
       )}
 
       {/* Cards Comparativos */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '8px' }}>
         <button
           onClick={handle99Click}
           style={{
@@ -684,6 +701,15 @@ export default function SmartRideApp() {
         </button>
       </div>
 
+      {/* Linha discreta de proteção e conferência */}
+      {hasCompared && (
+        <div style={{ textAlign: 'center', marginBottom: '14px' }}>
+          <span style={{ fontSize: '10.5px', color: '#64748b', lineHeight: 1.3 }}>
+            💡 Toque no app sugerido para conferir a tarifa final e confirmar a viagem.
+          </span>
+        </div>
+      )}
+
       <button
         onClick={handleCompare}
         disabled={isComparing}
@@ -703,8 +729,62 @@ export default function SmartRideApp() {
         {isComparing ? 'Calculando percurso e tarifas...' : hasCompared ? '🔄 Atualizar Tarifas' : '🔍 Comparar Tarifas'}
       </button>
 
-      <TitaniumCoin />
+      <TitaniumCoin onOpenLegal={() => setShowLegalModal(true)} />
+
+      {/* Modal discreto de Isenção Legal */}
+      {showLegalModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(15, 23, 42, 0.65)',
+          backdropFilter: 'blur(3px)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '20px',
+          zIndex: 9999
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff',
+            borderRadius: '16px',
+            padding: '20px',
+            maxWidth: '380px',
+            width: '100%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)',
+            maxHeight: '80vh',
+            overflowY: 'auto'
+          }}>
+            <h3 style={{ margin: '0 0 12px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a' }}>
+              Aviso Legal & Isenção
+            </h3>
+            <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5, margin: '0 0 10px 0' }}>
+              1. <strong>Independência:</strong> O SmartRide é uma ferramenta tecnológica independente desenvolvida pela Infinite Intelligence Labs. Não possuímos vínculo, afiliação, representação ou parceria exclusiva com a Uber Technologies Inc. ou com a 99 Tecnologia Ltda.
+            </p>
+            <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5, margin: '0 0 10px 0' }}>
+              2. <strong>Estimativas Técnicas:</strong> Os valores exibidos são cálculos referenciais fundamentados em telemetria geográfica e tabelas públicas vigentes, servindo como guia orientador.
+            </p>
+            <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.5, margin: '0 0 14px 0' }}>
+              3. <strong>Contratação:</strong> A contratação do transporte, tarifas finais e termos de serviço ocorrem exclusivamente no aplicativo oficial escolhido pelo passageiro.
+            </p>
+            <button
+              onClick={() => setShowLegalModal(false)}
+              style={{
+                width: '100%',
+                backgroundColor: '#044e42',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '10px',
+                fontSize: '13px',
+                fontWeight: '700',
+                cursor: 'pointer'
+              }}
+            >
+              Compreendi e Concordo
+            </button>
+          </div>
+        </div>
+      )}
     </main>
   )
-}
 }
