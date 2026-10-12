@@ -2,43 +2,54 @@
 
 import React, { useState, useEffect } from 'react'
 
-// Logotipo Proprietário B do Best Ride
-const BestRideBrand = () => (
+// Logotipo Proprietário "S" Estilizado em Faixas de Percurso para o SmartRide
+const SmartRideBrand = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
-    <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 6px rgba(0, 168, 107, 0.15))' }}>
+    <svg width="58" height="58" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 10px rgba(0, 168, 107, 0.2))' }}>
+      <defs>
+        <linearGradient id="srGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#00E676" />
+          <stop offset="100%" stopColor="#00A86B" />
+        </linearGradient>
+        <linearGradient id="srGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#38BDF8" />
+          <stop offset="100%" stopColor="#0284C7" />
+        </linearGradient>
+        <linearGradient id="srGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#044E42" />
+          <stop offset="100%" stopColor="#00A86B" />
+        </linearGradient>
+      </defs>
+
+      {/* Faixa Superior da Rota (Curva S) */}
       <path
-        d="M20 10C20 10 37 10 42 16.5C46.5 22.5 40 28.5 32 29.5C43.5 30.5 48 37.5 43.5 45.5C39 52.5 24 52.5 20 52.5C15 52.5 13.5 49 13.5 45C13.5 39.5 18 35 29 35C40 35 42.5 29.5 37.5 26C33 22.5 20 22.5 20 22.5"
-        stroke="#00E676"
-        strokeWidth="4.5"
+        d="M48 15C42 9 26 9 18 17C12 23 15 31 24 33"
+        stroke="url(#srGrad1)"
+        strokeWidth="5"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
+      {/* Faixa Central Intermediária (Trajetória Inteligente) */}
       <path
-        d="M23 15C23 15 34 15 37 20C40 25 36.5 28.5 29.5 29C38.5 30 41 36.5 37 42C33.5 47 25 47 23 47"
-        stroke="#00A86B"
-        strokeWidth="2"
+        d="M44 24C38 18 28 20 23 27C18 34 22 41 32 43"
+        stroke="url(#srGrad2)"
+        strokeWidth="3.5"
         strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.85"
+        opacity="0.95"
       />
+      {/* Faixa Inferior de Destino da Rota */}
       <path
-        d="M19.5 10V52.5"
-        stroke="#008B74"
-        strokeWidth="4.5"
+        d="M40 31C49 33 52 41 46 47C38 55 22 55 16 49"
+        stroke="url(#srGrad3)"
+        strokeWidth="5"
         strokeLinecap="round"
       />
-      <path
-        d="M14.5 14V48"
-        stroke="#00A86B"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        opacity="0.7"
-      />
-      <circle cx="29" cy="35" r="2.5" fill="#38bdf8" />
+      {/* Pin de Conexão Central */}
+      <circle cx="32" cy="32" r="3" fill="#38BDF8" />
     </svg>
+
     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-      <span style={{ fontSize: '27px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>BEST</span>
-      <span style={{ fontSize: '27px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
+      <span style={{ fontSize: '26px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>SMART</span>
+      <span style={{ fontSize: '26px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
     </div>
   </div>
 )
@@ -102,7 +113,6 @@ const TitaniumCoin = () => (
   </div>
 )
 
-// Locais padrão iniciais para agilidade
 const DEFAULT_SAVED_PLACES = [
   'Faculdade Ellen',
   'Praça Afonso Pena',
@@ -111,13 +121,12 @@ const DEFAULT_SAVED_PLACES = [
   'CenterVale Shopping'
 ]
 
-export default function BestRideApp() {
+export default function SmartRideApp() {
   const [isUsingGps, setIsUsingGps] = useState(true)
   const [manualPickup, setManualPickup] = useState('')
   const [stops, setStops] = useState<string[]>([])
   const [destinationAddress, setDestinationAddress] = useState('Praça Afonso Pena')
 
-  // Controle de locais memorizados no aparelho
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_SAVED_PLACES)
   const [activeField, setActiveField] = useState<'pickup' | 'destination' | number | null>(null)
 
@@ -127,29 +136,25 @@ export default function BestRideApp() {
   const [priceUber, setPriceUber] = useState<string | null>(null)
   const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string } | null>(null)
 
-  // Carrega histórico memorizado localmente ao abrir
   useEffect(() => {
     try {
-      const stored = localStorage.getItem('best_ride_saved_places')
+      const stored = localStorage.getItem('smart_ride_saved_places')
       if (stored) {
         const parsed = JSON.parse(stored)
         if (Array.isArray(parsed) && parsed.length > 0) {
           setSavedPlaces(parsed)
         }
       }
-    } catch {
-      // Navegador em modo privado ou suporte desabilitado
-    }
+    } catch {}
   }, [])
 
-  // Guarda novos locais frequentemente usados
   const savePlaceToHistory = (place: string) => {
     const trimmed = place.trim()
     if (!trimmed || trimmed === 'Minha localização atual (GPS)') return
     setSavedPlaces(prev => {
       const updated = [trimmed, ...prev.filter(p => p.toLowerCase() !== trimmed.toLowerCase())].slice(0, 7)
       try {
-        localStorage.setItem('best_ride_saved_places', JSON.stringify(updated))
+        localStorage.setItem('smart_ride_saved_places', JSON.stringify(updated))
       } catch {}
       return updated
     })
@@ -199,7 +204,6 @@ export default function BestRideApp() {
   const handleCompare = () => {
     setIsComparing(true)
 
-    // Grava automaticamente os locais preenchidos no histórico
     if (!isUsingGps && manualPickup) savePlaceToHistory(manualPickup)
     if (destinationAddress) savePlaceToHistory(destinationAddress)
     stops.forEach(s => { if (s) savePlaceToHistory(s) })
@@ -270,10 +274,10 @@ export default function BestRideApp() {
       maxWidth: '430px',
       margin: '0 auto'
     }}>
-      {/* Logotipo Superior */}
-      <BestRideBrand />
+      {/* Logotipo Superior SMART RIDE com S em Faixas */}
+      <SmartRideBrand />
 
-      {/* Caixa de Trajeto */}
+      {/* Bloco de Trajeto */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '18px',
@@ -283,7 +287,6 @@ export default function BestRideApp() {
         marginBottom: '14px',
         position: 'relative'
       }}>
-        {/* Linha vertical tracejada com controle dinâmico */}
         <div style={{
           position: 'absolute',
           left: '14px',
@@ -375,7 +378,7 @@ export default function BestRideApp() {
 
         <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
 
-        {/* Paradas Intermediárias */}
+        {/* Paradas */}
         {stops.map((stop, index) => (
           <React.Fragment key={index}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
@@ -432,7 +435,7 @@ export default function BestRideApp() {
           </React.Fragment>
         ))}
 
-        {/* Linha Final: Destino */}
+        {/* Destino */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
             <div style={{
@@ -488,7 +491,7 @@ export default function BestRideApp() {
         </div>
       </div>
 
-      {/* Sugestões Rápidas de Locais Frequentes (Aparece ao focar no campo) */}
+      {/* Sugestões Rápidas */}
       {activeField !== null && (
         <div style={{
           backgroundColor: '#ffffff',
@@ -536,7 +539,7 @@ export default function BestRideApp() {
         </div>
       )}
 
-      {/* Cápsula Informativa: Distância + Tempo */}
+      {/* Cápsula de Telemetria */}
       {hasCompared && tripTelemetry && (
         <div style={{
           backgroundColor: '#f1f5f9',
@@ -557,9 +560,8 @@ export default function BestRideApp() {
         </div>
       )}
 
-      {/* Cards Lado a Lado (99 e Uber) */}
+      {/* Cards 99 e Uber */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-        {/* Card 99 */}
         <button
           onClick={handle99Click}
           style={{
@@ -597,7 +599,6 @@ export default function BestRideApp() {
           )}
         </button>
 
-        {/* Card UberX */}
         <button
           onClick={handleUberClick}
           style={{
@@ -629,7 +630,7 @@ export default function BestRideApp() {
         </button>
       </div>
 
-      {/* Botão de Comparar / Atualizar */}
+      {/* Botão de Comparação */}
       <button
         onClick={handleCompare}
         disabled={isComparing}
