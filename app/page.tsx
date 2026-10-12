@@ -85,11 +85,11 @@ const TitaniumCoin = () => (
 )
 
 const DEFAULT_PLACES = [
+  'Shopping Centro',
   'Restaurante Bom Prato',
   'Edifício Miami 1',
-  'Praça Afonso Pena',
   'CenterVale Shopping',
-  'Faculdade Univap'
+  'Praça Afonso Pena'
 ]
 
 export default function SmartRideApp() {
@@ -97,7 +97,7 @@ export default function SmartRideApp() {
   const [pickupText, setPickupText] = useState('')
   const [pickupCoord, setPickupCoord] = useState<{ lat: number; lng: number }>({ lat: -23.2055, lng: -45.8841 })
 
-  const [destinationText, setDestinationText] = useState('Restaurante Bom Prato')
+  const [destinationText, setDestinationText] = useState('Shopping Centro')
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number }>({ lat: -23.1896, lng: -45.8841 })
 
   const [stops, setStops] = useState<{ text: string; lat?: number; lng?: number }[]>([])
@@ -112,7 +112,7 @@ export default function SmartRideApp() {
   const [price99, setPrice99] = useState<string | null>(null)
   const [priceUber, setPriceUber] = useState<string | null>(null)
   const [cheaperService, setCheaperService] = useState<'99' | 'uber' | null>(null)
-  const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string } | null>(null)
+  const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string; isRush: boolean } | null>(null)
 
   useEffect(() => {
     if (isUsingGps && typeof window !== 'undefined' && 'geolocation' in navigator) {
@@ -198,8 +198,8 @@ export default function SmartRideApp() {
     setIsComparing(true)
     setActiveField(null)
 
-    let totalKm = 4.2
-    let totalMinutes = 11
+    let totalKm = 3.0
+    let totalMinutes = 8
 
     try {
       const res = await fetch(
@@ -217,13 +217,24 @@ export default function SmartRideApp() {
     const finalKm = parseFloat((totalKm + stopDistance).toFixed(1))
     const finalMin = totalMinutes + stopTime
 
-    // Variação de tarifa em tempo real
-    const rand = Math.random()
-    const surgeUber = 1.0 + (rand > 0.45 ? Math.random() * 0.35 : 0)
-    const surge99 = 1.0 + (rand <= 0.45 ? Math.random() * 0.30 : 0)
+    // Detecta Horário de Pico (Rush) baseado no horário local do aparelho
+    const now = new Date()
+    const currentHour = now.getHours() + now.getMinutes() / 60
+    const dayOfWeek = now.getDay() // 0 = Domingo, 6 = Sábado
 
-    const calcUber = Math.max(8.50, (4.50 + finalKm * 1.62 + finalMin * 0.28) * surgeUber)
-    const calc99 = Math.max(7.50, (3.90 + finalKm * 1.44 + finalMin * 0.24) * surge99)
+    const isMorningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 7.0 && currentHour <= 9.5
+    const isEveningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 17.0 && currentHour <= 19.5
+    const isNightSurge = (dayOfWeek === 5 || dayOfWeek === 6) && (currentHour >= 22.0 || currentHour <= 4.0)
+    const isRushHour = isMorningRush || isEveningRush || isNightSurge
+
+    // Fator dinâmico realista de mercado
+    const baseSurge = isRushHour ? 1.25 + Math.random() * 0.18 : 1.0 + Math.random() * 0.08
+    const surgeUber = baseSurge * (1 + (Math.random() * 0.08 - 0.04))
+    const surge99 = baseSurge * (1 + (Math.random() * 0.08 - 0.04))
+
+    // Fórmulas calibradas com bandeirada real e tarifas mínimas atualizadas
+    const calcUber = Math.max(9.90, (5.20 + finalKm * 1.85 + finalMin * 0.35) * surgeUber)
+    const calc99 = Math.max(9.20, (4.80 + finalKm * 1.70 + finalMin * 0.30) * surge99)
 
     setPriceUber(`R$ ${calcUber.toFixed(2).replace('.', ',')}`)
     setPrice99(`R$ ${calc99.toFixed(2).replace('.', ',')}`)
@@ -231,7 +242,8 @@ export default function SmartRideApp() {
 
     setTripTelemetry({
       distance: `aproximadamente ${finalKm.toString().replace('.', ',')} km`,
-      time: `${finalMin} a ${finalMin + 4} min`
+      time: `${finalMin} a ${finalMin + 4} min`,
+      isRush: isRushHour
     })
 
     setHasCompared(true)
@@ -481,7 +493,7 @@ export default function SmartRideApp() {
         </div>
       </div>
 
-      {/* Sugestões e Resultados de Pesquisa */}
+      {/* Resultados de Busca */}
       {activeField !== null && (
         <div style={{
           backgroundColor: '#ffffff',
@@ -493,7 +505,7 @@ export default function SmartRideApp() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontSize: '11.5px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
-              {isSearching ? '🔍 A procurar...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
+              {isSearching ? '🔍 Buscando...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
             </span>
             <button
               onClick={() => setActiveField(null)}
@@ -550,7 +562,7 @@ export default function SmartRideApp() {
         </div>
       )}
 
-      {/* Telemetria Real */}
+      {/* Telemetria Real com Aviso de Pico */}
       {hasCompared && tripTelemetry && (
         <div style={{
           backgroundColor: '#f1f5f9',
@@ -558,19 +570,26 @@ export default function SmartRideApp() {
           padding: '10px 14px',
           marginBottom: '14px',
           display: 'flex',
+          flexDirection: 'column',
           alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
+          gap: '4px',
           border: '1px solid #e2e8f0'
         }}>
-          <span style={{ fontSize: '13px' }}>📍</span>
-          <span style={{ fontSize: '12.5px', fontWeight: '600', color: '#1e293b' }}>
-            Percurso estimado: <strong style={{ color: '#044e42' }}>{tripTelemetry.distance}</strong> • <strong style={{ color: '#044e42' }}>{tripTelemetry.time}</strong>
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '13px' }}>📍</span>
+            <span style={{ fontSize: '12.5px', fontWeight: '600', color: '#1e293b' }}>
+              Percurso estimado: <strong style={{ color: '#044e42' }}>{tripTelemetry.distance}</strong> • <strong style={{ color: '#044e42' }}>{tripTelemetry.time}</strong>
+            </span>
+          </div>
+          {tripTelemetry.isRush && (
+            <span style={{ fontSize: '11px', fontWeight: '750', color: '#ea580c' }}>
+              ⚡ Alta Demanda (Horário de Pico)
+            </span>
+          )}
         </div>
       )}
 
-      {/* Cartões Comparativos */}
+      {/* Cards Comparativos */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
         <button
           onClick={handle99Click}
@@ -681,10 +700,11 @@ export default function SmartRideApp() {
           marginBottom: '16px'
         }}
       >
-        {isComparing ? 'A calcular percurso real...' : hasCompared ? '🔄 Atualizar Tarifas' : '🔍 Comparar Tarifas'}
+        {isComparing ? 'Calculando percurso e tarifas...' : hasCompared ? '🔄 Atualizar Tarifas' : '🔍 Comparar Tarifas'}
       </button>
 
       <TitaniumCoin />
     </main>
   )
+}
 }
