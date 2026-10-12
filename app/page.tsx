@@ -2,51 +2,25 @@
 
 import React, { useState, useEffect } from 'react'
 
-// Logotipo Minimalista: Contorno do S com Seta Descendente Prolongada
+// Logotipo Simples e Estável provisório (ajustamos o design final depois)
 const SmartRideBrand = () => (
-  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
-    <svg width="60" height="66" viewBox="0 0 64 74" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 10px rgba(0, 168, 107, 0.2))' }}>
-      <defs>
-        <linearGradient id="sContourGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#00E676" />
-          <stop offset="100%" stopColor="#00A86B" />
-        </linearGradient>
-        <linearGradient id="arrowDownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#38BDF8" />
-          <stop offset="100%" stopColor="#0284C7" />
-        </linearGradient>
-      </defs>
-
-      {/* 1. HASTE VERTICAL DA SETA (Desce até bem embaixo) */}
-      <line
-        x1="32"
-        y1="4"
-        x2="32"
-        y2="60"
-        stroke="url(#arrowDownGrad)"
-        strokeWidth="4"
-        strokeLinecap="round"
-      />
-
-      {/* 2. PONTA DA SETA DESCENDENTE BEM DESTACADA EMBAIXO */}
-      <path
-        d="M23 53L32 66L41 53"
-        stroke="url(#arrowDownGrad)"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* 3. CONTORNO ELEGANTE E LIMPO DO "S" (Sem sobreposição confusa) */}
-      <path
-        d="M48 18C44 11 26 11 20 18C14 25 18 33 32 34C46 35 50 43 44 50C38 57 20 57 16 50"
-        stroke="url(#sContourGrad)"
-        strokeWidth="5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '22px' }}>
+    <div style={{
+      width: '46px',
+      height: '46px',
+      borderRadius: '14px',
+      background: 'linear-gradient(135deg, #00E676 0%, #00A86B 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      boxShadow: '0 4px 12px rgba(0, 168, 107, 0.25)',
+      color: '#ffffff',
+      fontSize: '26px',
+      fontWeight: '900',
+      letterSpacing: '-1px'
+    }}>
+      S
+    </div>
     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
       <span style={{ fontSize: '26px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>SMART</span>
       <span style={{ fontSize: '26px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
@@ -201,6 +175,7 @@ export default function SmartRideApp() {
     setStops(updated)
   }
 
+  // Motor de Cálculo Dinâmico de Tarifas
   const handleCompare = () => {
     setIsComparing(true)
 
@@ -210,28 +185,29 @@ export default function SmartRideApp() {
     setActiveField(null)
 
     setTimeout(() => {
-      if (stops.length === 2) {
-        setPrice99('R$ 16,90')
-        setPriceUber('R$ 24,50')
-        setTripTelemetry({
-          distance: 'aproximadamente 12,3 km',
-          time: '28 a 35 min'
-        })
-      } else if (stops.length === 1) {
-        setPrice99('R$ 12,40')
-        setPriceUber('R$ 19,80')
-        setTripTelemetry({
-          distance: 'aproximadamente 8,7 km',
-          time: '20 a 25 min'
-        })
-      } else {
-        setPrice99('R$ 7,80')
-        setPriceUber('R$ 14,20')
-        setTripTelemetry({
-          distance: 'aproximadamente 5,4 km',
-          time: '12 a 15 min'
-        })
-      }
+      // Base da rota: estimativa por percurso urbano
+      const baseKm = 5.2
+      const stopKm = stops.length * 3.4
+      const totalKm = parseFloat((baseKm + stopKm).toFixed(1))
+      
+      const baseMinutes = 13
+      const stopMinutes = stops.length * 8
+      const totalMinMin = baseMinutes + stopMinutes
+      const totalMinMax = totalMinMin + 4
+
+      // Cálculo UberX: Base R$ 4,50 + R$ 1,55/km + R$ 0,28/min
+      const calcUber = Math.max(8.50, 4.50 + (totalKm * 1.55) + (totalMinMin * 0.28))
+
+      // Cálculo 99Pop: Base R$ 3,80 + R$ 1,40/km + R$ 0,24/min
+      const calc99 = Math.max(7.50, 3.80 + (totalKm * 1.40) + (totalMinMin * 0.24))
+
+      setPriceUber(`R$ ${calcUber.toFixed(2).replace('.', ',')}`)
+      setPrice99(`R$ ${calc99.toFixed(2).replace('.', ',')}`)
+      setTripTelemetry({
+        distance: `aproximadamente ${totalKm.toString().replace('.', ',')} km`,
+        time: `${totalMinMin} a ${totalMinMax} min`
+      })
+
       setHasCompared(true)
       setIsComparing(false)
     }, 600)
@@ -274,7 +250,6 @@ export default function SmartRideApp() {
       maxWidth: '430px',
       margin: '0 auto'
     }}>
-      {/* Logotipo Superior Minimalista */}
       <SmartRideBrand />
 
       {/* Bloco de Trajeto */}
@@ -539,7 +514,7 @@ export default function SmartRideApp() {
         </div>
       )}
 
-      {/* Cápsula de Telemetria */}
+      {/* Cápsula de Telemetria Dinâmica */}
       {hasCompared && tripTelemetry && (
         <div style={{
           backgroundColor: '#f1f5f9',
@@ -560,7 +535,7 @@ export default function SmartRideApp() {
         </div>
       )}
 
-      {/* Cards 99 e Uber */}
+      {/* Cards 99 e Uber com Preços Dinâmicos */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
         <button
           onClick={handle99Click}
@@ -662,7 +637,6 @@ export default function SmartRideApp() {
         )}
       </button>
 
-      {/* Assinatura com Moeda de Titânio */}
       <TitaniumCoin />
     </main>
   )
