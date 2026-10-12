@@ -1,10 +1,8 @@
 import type { Metadata } from 'next'
-import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SmartRide | Mobilidade Inteligente',
-  description: 'Compare tarifas 99 e UberX em tempo real com economia inteligente.',
-  manifest: '/manifest.json',
+  title: 'SmartRide',
+  description: 'Comparador de tarifas de transporte em tempo real',
 }
 
 export default function RootLayout({
@@ -14,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-BR">
-      <body style={{ margin: 0, padding: 0, backgroundColor: '#f8fafc' }}>
+      <body style={{ margin: 0, padding: 0, boxSizing: 'border-box' }}>
         {children}
       </body>
     </html>
