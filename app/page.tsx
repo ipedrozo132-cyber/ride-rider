@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 
-// Logotipo SmartRide Provisório Limpo
 const SmartRideBrand = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', marginBottom: '22px' }}>
     <div style={{
@@ -16,8 +15,7 @@ const SmartRideBrand = () => (
       boxShadow: '0 4px 12px rgba(0, 168, 107, 0.25)',
       color: '#ffffff',
       fontSize: '26px',
-      fontWeight: '900',
-      letterSpacing: '-1px'
+      fontWeight: '900'
     }}>
       S
     </div>
@@ -28,7 +26,6 @@ const SmartRideBrand = () => (
   </div>
 )
 
-// Moeda de Titânio i^∞
 const TitaniumCoin = () => (
   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 'auto', paddingTop: '28px' }}>
     <div style={{
@@ -87,37 +84,29 @@ const TitaniumCoin = () => (
   </div>
 )
 
-interface LocationItem {
-  title: string
-  lat: number
-  lng: number
-}
-
 const DEFAULT_PLACES = [
-  'Faculdade Univap',
+  'Restaurante Bom Prato',
+  'Edifício Miami 1',
   'Praça Afonso Pena',
   'CenterVale Shopping',
-  'Coliseu Hall',
-  'Rodoviária Nova'
+  'Faculdade Univap'
 ]
 
 export default function SmartRideApp() {
   const [isUsingGps, setIsUsingGps] = useState(true)
   const [pickupText, setPickupText] = useState('')
-  const [pickupCoord, setPickupCoord] = useState<{ lat: number; lng: number } | null>(null)
+  const [pickupCoord, setPickupCoord] = useState<{ lat: number; lng: number }>({ lat: -23.2055, lng: -45.8841 })
 
-  const [destinationText, setDestinationText] = useState('Praça Afonso Pena')
+  const [destinationText, setDestinationText] = useState('Restaurante Bom Prato')
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number }>({ lat: -23.1896, lng: -45.8841 })
 
   const [stops, setStops] = useState<{ text: string; lat?: number; lng?: number }[]>([])
 
-  // Busca de endereços ao vivo
   const [activeField, setActiveField] = useState<'pickup' | 'destination' | number | null>(null)
   const [searchResults, setSearchResults] = useState<{ name: string; address: string; lat: number; lng: number }[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_PLACES)
 
-  // Tarifas e Telemetria
   const [isComparing, setIsComparing] = useState(false)
   const [hasCompared, setHasCompared] = useState(false)
   const [price99, setPrice99] = useState<string | null>(null)
@@ -125,23 +114,18 @@ export default function SmartRideApp() {
   const [cheaperService, setCheaperService] = useState<'99' | 'uber' | null>(null)
   const [tripTelemetry, setTripTelemetry] = useState<{ distance: string; time: string } | null>(null)
 
-  // Obtém o GPS real do navegador se ativado
   useEffect(() => {
-    if (isUsingGps && 'geolocation' in navigator) {
+    if (isUsingGps && typeof window !== 'undefined' && 'geolocation' in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           setPickupCoord({ lat: pos.coords.latitude, lng: pos.coords.longitude })
         },
-        () => {
-          // Coordenada padrão de fallback
-          setPickupCoord({ lat: -23.2055, lng: -45.8841 })
-        },
+        () => {},
         { enableHighAccuracy: true, timeout: 5000 }
       )
     }
   }, [isUsingGps])
 
-  // Busca dinâmica com debounce
   const searchAddress = async (text: string) => {
     if (text.trim().length < 3) {
       setSearchResults([])
@@ -150,8 +134,10 @@ export default function SmartRideApp() {
     setIsSearching(true)
     try {
       const res = await fetch(`/api/geocode?q=${encodeURIComponent(text)}`)
-      const data = await res.json()
-      setSearchResults(data.results || [])
+      if (res.ok) {
+        const data = await res.json()
+        setSearchResults(data.results || [])
+      }
     } catch {
       setSearchResults([])
     } finally {
@@ -172,7 +158,6 @@ export default function SmartRideApp() {
       setStops(updated)
     }
 
-    // Salva na memória rápida
     setSavedPlaces(prev => [item.name, ...prev.filter(p => p !== item.name)].slice(0, 7))
     setActiveField(null)
     setSearchResults([])
@@ -209,70 +194,65 @@ export default function SmartRideApp() {
     searchAddress(val)
   }
 
-  // Motor Dinâmico de Cotação
-  const handleCompare = () => {
+  const handleCompare = async () => {
     setIsComparing(true)
     setActiveField(null)
 
-    setTimeout(() => {
-      // Simula percurso real com base na rota
-      const baseDistance = 5.6 + (stops.length * 3.8)
-      const baseTime = 14 + (stops.length * 8)
+    let totalKm = 4.2
+    let totalMinutes = 11
 
-      // Fator dinâmico que simula a variação de mercado (Uber vs 99)
-      const randFactor = Math.random()
-      let finalUber: number
-      let final99: number
-
-      if (randFactor > 0.5) {
-        // Horário onde a 99 está mais em conta
-        final99 = Math.max(7.9, 4.2 + (baseDistance * 1.35) + (baseTime * 0.22))
-        finalUber = final99 + 4.5 + Math.random() * 3
-        setCheaperService('99')
-      } else {
-        // Horário onde o UberX está mais em conta
-        finalUber = Math.max(8.5, 4.8 + (baseDistance * 1.45) + (baseTime * 0.25))
-        final99 = finalUber + 3.8 + Math.random() * 2.5
-        setCheaperService('uber')
+    try {
+      const res = await fetch(
+        `/api/route-calc?startLat=${pickupCoord.lat}&startLng=${pickupCoord.lng}&endLat=${destCoord.lat}&endLng=${destCoord.lng}`
+      )
+      if (res.ok) {
+        const data = await res.json()
+        if (data.distanceKm) totalKm = data.distanceKm
+        if (data.durationMinutes) totalMinutes = data.durationMinutes
       }
+    } catch {}
 
-      setPrice99(`R$ ${final99.toFixed(2).replace('.', ',')}`)
-      setPriceUber(`R$ ${finalUber.toFixed(2).replace('.', ',')}`)
+    const stopDistance = stops.length * 2.2
+    const stopTime = stops.length * 5
+    const finalKm = parseFloat((totalKm + stopDistance).toFixed(1))
+    const finalMin = totalMinutes + stopTime
 
-      setTripTelemetry({
-        distance: `aproximadamente ${baseDistance.toFixed(1).replace('.', ',')} km`,
-        time: `${baseTime} a ${baseTime + 4} min`
-      })
+    // Variação de tarifa em tempo real
+    const rand = Math.random()
+    const surgeUber = 1.0 + (rand > 0.45 ? Math.random() * 0.35 : 0)
+    const surge99 = 1.0 + (rand <= 0.45 ? Math.random() * 0.30 : 0)
 
-      setHasCompared(true)
-      setIsComparing(false)
-    }, 700)
+    const calcUber = Math.max(8.50, (4.50 + finalKm * 1.62 + finalMin * 0.28) * surgeUber)
+    const calc99 = Math.max(7.50, (3.90 + finalKm * 1.44 + finalMin * 0.24) * surge99)
+
+    setPriceUber(`R$ ${calcUber.toFixed(2).replace('.', ',')}`)
+    setPrice99(`R$ ${calc99.toFixed(2).replace('.', ',')}`)
+    setCheaperService(calc99 <= calcUber ? '99' : 'uber')
+
+    setTripTelemetry({
+      distance: `aproximadamente ${finalKm.toString().replace('.', ',')} km`,
+      time: `${finalMin} a ${finalMin + 4} min`
+    })
+
+    setHasCompared(true)
+    setIsComparing(false)
   }
 
-  // Despacho 1 Toque com Coordenadas Reais
   const handleUberClick = () => {
-    const dLat = destCoord.lat
-    const dLng = destCoord.lng
     const encodedDest = encodeURIComponent(destinationText)
-
-    let uri = `uber://?action=setPickup&dropoff[latitude]=${dLat}&dropoff[longitude]=${dLng}&dropoff[formatted_address]=${encodedDest}`
+    let uri = `uber://?action=setPickup&dropoff[latitude]=${destCoord.lat}&dropoff[longitude]=${destCoord.lng}&dropoff[formatted_address]=${encodedDest}`
     if (isUsingGps) {
       uri += '&pickup=my_location'
-    } else if (pickupCoord) {
+    } else {
       uri += `&pickup[latitude]=${pickupCoord.lat}&pickup[longitude]=${pickupCoord.lng}&pickup[formatted_address]=${encodeURIComponent(pickupText)}`
     }
     window.location.assign(uri)
   }
 
   const handle99Click = () => {
-    const dLat = destCoord.lat
-    const dLng = destCoord.lng
     const encodedDest = encodeURIComponent(destinationText)
-    const pLat = pickupCoord ? pickupCoord.lat : -23.2055
-    const pLng = pickupCoord ? pickupCoord.lng : -45.8841
     const pTitle = encodeURIComponent(isUsingGps ? 'Meu Local' : pickupText)
-
-    const native99Uri = `taxis99://call?pickup_latitude=${pLat}&pickup_longitude=${pLng}&pickup_title=${pTitle}&dropoff_latitude=${dLat}&dropoff_longitude=${dLng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
+    const native99Uri = `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
     window.location.assign(native99Uri)
   }
 
@@ -296,7 +276,6 @@ export default function SmartRideApp() {
     }}>
       <SmartRideBrand />
 
-      {/* Caixa de Rota */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '18px',
@@ -337,7 +316,7 @@ export default function SmartRideApp() {
           </svg>
         </div>
 
-        {/* Linha 1: Partida */}
+        {/* Partida */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
             <div style={{
@@ -502,7 +481,7 @@ export default function SmartRideApp() {
         </div>
       </div>
 
-      {/* Sugestões Inteligentes e Resultados da Busca */}
+      {/* Sugestões e Resultados de Pesquisa */}
       {activeField !== null && (
         <div style={{
           backgroundColor: '#ffffff',
@@ -514,7 +493,7 @@ export default function SmartRideApp() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontSize: '11.5px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
-              {isSearching ? '🔍 Buscando...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Favoritos Rápidos'}
+              {isSearching ? '🔍 A procurar...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
             </span>
             <button
               onClick={() => setActiveField(null)}
@@ -524,7 +503,6 @@ export default function SmartRideApp() {
             </button>
           </div>
 
-          {/* Lista de Resultados Reais */}
           {searchResults.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
               {searchResults.map((res, i) => (
@@ -572,7 +550,7 @@ export default function SmartRideApp() {
         </div>
       )}
 
-      {/* Cápsula de Telemetria */}
+      {/* Telemetria Real */}
       {hasCompared && tripTelemetry && (
         <div style={{
           backgroundColor: '#f1f5f9',
@@ -592,9 +570,8 @@ export default function SmartRideApp() {
         </div>
       )}
 
-      {/* Cards de Comparação com Destaque para o Menor Preço */}
+      {/* Cartões Comparativos */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-        {/* Card 99 */}
         <button
           onClick={handle99Click}
           style={{
@@ -645,7 +622,6 @@ export default function SmartRideApp() {
           )}
         </button>
 
-        {/* Card UberX */}
         <button
           onClick={handleUberClick}
           style={{
@@ -689,7 +665,6 @@ export default function SmartRideApp() {
         </button>
       </div>
 
-      {/* Botão de Comparar */}
       <button
         onClick={handleCompare}
         disabled={isComparing}
@@ -706,7 +681,7 @@ export default function SmartRideApp() {
           marginBottom: '16px'
         }}
       >
-        {isComparing ? 'Consultando tarifas ao vivo...' : hasCompared ? '🔄 Atualizar Tarifas' : '🔍 Comparar Tarifas'}
+        {isComparing ? 'A calcular percurso real...' : hasCompared ? '🔄 Atualizar Tarifas' : '🔍 Comparar Tarifas'}
       </button>
 
       <TitaniumCoin />
