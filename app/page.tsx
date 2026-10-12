@@ -2,49 +2,51 @@
 
 import React, { useState, useEffect } from 'react'
 
-// Logotipo Proprietário "S" Estilizado em Faixas de Percurso para o SmartRide
+// Logótipo Proprietário "S" Cifrão + Seta de Trajeto e Economia
 const SmartRideBrand = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
-    <svg width="58" height="58" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 10px rgba(0, 168, 107, 0.2))' }}>
+    <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 10px rgba(0, 168, 107, 0.22))' }}>
       <defs>
-        <linearGradient id="srGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="sGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#00E676" />
-          <stop offset="100%" stopColor="#00A86B" />
+          <stop offset="50%" stopColor="#00A86B" />
+          <stop offset="100%" stopColor="#044E42" />
         </linearGradient>
-        <linearGradient id="srGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
           <stop offset="0%" stopColor="#38BDF8" />
           <stop offset="100%" stopColor="#0284C7" />
         </linearGradient>
-        <linearGradient id="srGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#044E42" />
-          <stop offset="100%" stopColor="#00A86B" />
-        </linearGradient>
       </defs>
 
-      {/* Faixa Superior da Rota (Curva S) */}
-      <path
-        d="M48 15C42 9 26 9 18 17C12 23 15 31 24 33"
-        stroke="url(#srGrad1)"
-        strokeWidth="5"
-        strokeLinecap="round"
-      />
-      {/* Faixa Central Intermediária (Trajetória Inteligente) */}
-      <path
-        d="M44 24C38 18 28 20 23 27C18 34 22 41 32 43"
-        stroke="url(#srGrad2)"
+      {/* Seta Vertical que atravessa o S formando o Cifrão ($) e a Direção de Queda de Preço */}
+      <line
+        x1="32"
+        y1="6"
+        x2="32"
+        y2="50"
+        stroke="url(#arrowGrad)"
         strokeWidth="3.5"
         strokeLinecap="round"
-        opacity="0.95"
       />
-      {/* Faixa Inferior de Destino da Rota */}
       <path
-        d="M40 31C49 33 52 41 46 47C38 55 22 55 16 49"
-        stroke="url(#srGrad3)"
+        d="M27 46L32 54L37 46"
+        stroke="url(#arrowGrad)"
+        strokeWidth="3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Curvas do "S" com faixas estilizadas de pista/estrada */}
+      <path
+        d="M45 18C41 12 25 12 21 18C16 25 21 31 32 32C43 33 48 39 43 46C39 52 23 52 19 46"
+        stroke="url(#sGrad)"
         strokeWidth="5"
         strokeLinecap="round"
+        strokeLinejoin="round"
       />
-      {/* Pin de Conexão Central */}
-      <circle cx="32" cy="32" r="3" fill="#38BDF8" />
+
+      {/* Ponto GPS no cruzamento central */}
+      <circle cx="32" cy="32" r="3" fill="#ffffff" stroke="#00A86B" strokeWidth="2" />
     </svg>
 
     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
@@ -274,7 +276,7 @@ export default function SmartRideApp() {
       maxWidth: '430px',
       margin: '0 auto'
     }}>
-      {/* Logotipo Superior SMART RIDE com S em Faixas */}
+      {/* Logótipo Superior SMART RIDE com S Cifrão + Seta */}
       <SmartRideBrand />
 
       {/* Bloco de Trajeto */}
