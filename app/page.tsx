@@ -192,8 +192,8 @@ export default function SmartRideApp() {
     setIsComparing(true)
     setActiveField(null)
 
-    let totalKm = 3.0
-    let totalMinutes = 8
+    let totalKm = 2.6
+    let totalMinutes = 7
 
     try {
       const res = await fetch(
@@ -213,17 +213,19 @@ export default function SmartRideApp() {
     const currentHour = now.getHours() + now.getMinutes() / 60
     const dayOfWeek = now.getDay()
 
+    // Janelas de pico calibradas: manhã, entardecer e noite com tráfego/intempérie
     const isMorningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 7.0 && currentHour <= 9.5
-    const isEveningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 17.0 && currentHour <= 19.5
+    const isEveningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 17.5 && currentHour <= 22.0
     const isNightSurge = (dayOfWeek === 5 || dayOfWeek === 6) && (currentHour >= 22.0 || currentHour <= 4.0)
     const isRushHour = isMorningRush || isEveningRush || isNightSurge
 
-    const baseSurge = isRushHour ? 1.25 + Math.random() * 0.18 : 1.0 + Math.random() * 0.08
-    const surgeUber = baseSurge * (1 + (Math.random() * 0.08 - 0.04))
-    const surge99 = baseSurge * (1 + (Math.random() * 0.08 - 0.04))
+    // Multiplicadores dinâmicos refletindo chuva/alta demanda
+    const baseSurgeUber = isRushHour ? 1.28 + Math.random() * 0.10 : 1.08 + Math.random() * 0.05
+    const baseSurge99 = isRushHour ? 1.16 + Math.random() * 0.08 : 1.02 + Math.random() * 0.04
 
-    const calcUber = Math.max(9.90, (5.20 + finalKm * 1.85 + finalMin * 0.35) * surgeUber)
-    const calc99 = Math.max(9.20, (4.80 + finalKm * 1.70 + finalMin * 0.30) * surge99)
+    // Modelagem calibrada para coincidir com os testes práticos reais (R$ 13 na 99 e R$ 15,90 na Uber)
+    const calcUber = Math.max(12.80, (6.90 + finalKm * 2.25 + finalMin * 0.45) * baseSurgeUber)
+    const calc99 = Math.max(10.80, (5.90 + finalKm * 1.95 + finalMin * 0.36) * baseSurge99)
 
     setPriceUber(`R$ ${calcUber.toFixed(2).replace('.', ',')}`)
     setPrice99(`R$ ${calc99.toFixed(2).replace('.', ',')}`)
@@ -497,7 +499,7 @@ export default function SmartRideApp() {
           </div>
           {tripTelemetry.isRush && (
             <span style={{ fontSize: '11px', fontWeight: '750', color: '#ea580c' }}>
-              ⚡ Alta Demanda (Horário de Pico)
+              ⚡ Alta Demanda (Horário de Pico / Condições de Trânsito)
             </span>
           )}
         </div>
