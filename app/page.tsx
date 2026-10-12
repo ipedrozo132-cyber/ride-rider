@@ -118,9 +118,7 @@ export default function SmartRideApp() {
   const [destinationText, setDestinationText] = useState('Shopping Centro')
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number }>({ lat: -23.1896, lng: -45.8841 })
 
-  const [stops, setStops] = useState<{ text: string; lat?: number; lng?: number }[]>([])
-
-  const [activeField, setActiveField] = useState<'pickup' | 'destination' | number | null>(null)
+  const [activeField, setActiveField] = useState<'pickup' | 'destination' | null>(null)
   const [searchResults, setSearchResults] = useState<{ name: string; address: string; lat: number; lng: number }[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_PLACES)
@@ -171,10 +169,6 @@ export default function SmartRideApp() {
     } else if (activeField === 'destination') {
       setDestinationText(item.name)
       setDestCoord({ lat: item.lat, lng: item.lng })
-    } else if (typeof activeField === 'number') {
-      const updated = [...stops]
-      updated[activeField] = { text: item.name, lat: item.lat, lng: item.lng }
-      setStops(updated)
     }
 
     setSavedPlaces(prev => [item.name, ...prev.filter(p => p !== item.name)].slice(0, 7))
@@ -192,25 +186,6 @@ export default function SmartRideApp() {
       setPickupText('')
       setActiveField(null)
     }
-  }
-
-  const addStop = () => {
-    if (stops.length < 2) {
-      setStops([...stops, { text: '' }])
-      setActiveField(stops.length)
-    }
-  }
-
-  const removeStop = (index: number) => {
-    setStops(stops.filter((_, i) => i !== index))
-    if (activeField === index) setActiveField(null)
-  }
-
-  const updateStopText = (index: number, val: string) => {
-    const updated = [...stops]
-    updated[index] = { ...updated[index], text: val }
-    setStops(updated)
-    searchAddress(val)
   }
 
   const handleCompare = async () => {
@@ -231,10 +206,8 @@ export default function SmartRideApp() {
       }
     } catch {}
 
-    const stopDistance = stops.length * 2.2
-    const stopTime = stops.length * 5
-    const finalKm = parseFloat((totalKm + stopDistance).toFixed(1))
-    const finalMin = totalMinutes + stopTime
+    const finalKm = parseFloat(totalKm.toFixed(1))
+    const finalMin = totalMinutes
 
     const now = new Date()
     const currentHour = now.getHours() + now.getMinutes() / 60
@@ -284,11 +257,6 @@ export default function SmartRideApp() {
     window.location.assign(native99Uri)
   }
 
-  const svgHeight = stops.length === 2 ? 132 : stops.length === 1 ? 88 : 44
-  const lineY2 = stops.length === 2 ? 122 : stops.length === 1 ? 78 : 34
-  const arrowY = stops.length === 2 ? 121 : stops.length === 1 ? 77 : 33
-  const arrowTipY = stops.length === 2 ? 128 : stops.length === 1 ? 84 : 40
-
   return (
     <main style={{
       minHeight: '100dvh',
@@ -324,19 +292,19 @@ export default function SmartRideApp() {
           justifyContent: 'center',
           pointerEvents: 'none'
         }}>
-          <svg width="14" height="100%" viewBox={`0 0 14 ${svgHeight}`} preserveAspectRatio="none" fill="none">
+          <svg width="14" height="100%" viewBox="0 0 14 44" preserveAspectRatio="none" fill="none">
             <line
               x1="7"
               y1="2"
               x2="7"
-              y2={lineY2}
+              y2="34"
               stroke="#94a3b8"
               strokeWidth="2"
               strokeDasharray="3 3"
               strokeLinecap="round"
             />
             <path
-              d={`M3 ${arrowY}L7 ${arrowTipY}L11 ${arrowY}`}
+              d="M3 33L7 40L11 33"
               stroke="#94a3b8"
               strokeWidth="2"
               strokeLinecap="round"
@@ -405,59 +373,6 @@ export default function SmartRideApp() {
 
         <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
 
-        {/* Paradas */}
-        {stops.map((stop, index) => (
-          <React.Fragment key={index}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
-                <div style={{
-                  width: '14px',
-                  height: '14px',
-                  borderRadius: '50%',
-                  backgroundColor: index === 0 ? '#f59e0b' : '#fb923c',
-                  boxShadow: index === 0 ? '0 0 0 3px rgba(245, 158, 11, 0.2)' : '0 0 0 3px rgba(251, 146, 60, 0.2)',
-                  flexShrink: 0
-                }} />
-                <input
-                  type="text"
-                  autoFocus={index === stops.length - 1}
-                  value={stop.text}
-                  onFocus={() => setActiveField(index)}
-                  onChange={(e) => updateStopText(index, e.target.value)}
-                  placeholder={`Parada ${index + 1}...`}
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    outline: 'none',
-                    background: 'transparent',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#0f172a'
-                  }}
-                />
-              </div>
-
-              <button
-                onClick={() => removeStop(index)}
-                style={{
-                  border: 'none',
-                  backgroundColor: '#fee2e2',
-                  color: '#ef4444',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  fontSize: '11px',
-                  fontWeight: '800',
-                  cursor: 'pointer'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
-          </React.Fragment>
-        ))}
-
         {/* Destino */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
@@ -489,24 +404,6 @@ export default function SmartRideApp() {
               }}
             />
           </div>
-
-          {stops.length < 2 && (
-            <button
-              onClick={addStop}
-              style={{
-                border: '1px solid #e2e8f0',
-                backgroundColor: '#f8fafc',
-                color: '#044e42',
-                padding: '4px 8px',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: '700',
-                cursor: 'pointer'
-              }}
-            >
-              + Parada
-            </button>
-          )}
         </div>
       </div>
 
@@ -614,14 +511,14 @@ export default function SmartRideApp() {
             backgroundColor: '#ffffff',
             border: cheaperService === '99' ? '2.5px solid #10b981' : '1px solid #e2e8f0',
             borderRadius: '16px',
-            padding: hasCompared ? '14px 10px' : '22px 12px',
+            padding: hasCompared ? '12px 10px 10px 10px' : '22px 12px',
             boxShadow: cheaperService === '99' ? '0 4px 16px rgba(16, 185, 129, 0.2)' : '0 4px 12px rgba(0,0,0,0.06)',
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '4px',
             position: 'relative'
           }}
         >
@@ -652,9 +549,14 @@ export default function SmartRideApp() {
             <span style={{ fontSize: '23px', fontWeight: '950', color: '#000' }}>99</span>
           </div>
           {hasCompared && (
-            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
-              {price99}
-            </span>
+            <>
+              <span style={{ fontSize: '16px', fontWeight: '850', color: '#044e42', marginTop: '2px' }}>
+                {price99}
+              </span>
+              <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b', letterSpacing: '0.01em' }}>
+                estimativa atual
+              </span>
+            </>
           )}
         </button>
 
@@ -664,14 +566,14 @@ export default function SmartRideApp() {
             backgroundColor: '#ffffff',
             border: cheaperService === 'uber' ? '2.5px solid #10b981' : '1px solid #e2e8f0',
             borderRadius: '16px',
-            padding: hasCompared ? '14px 10px' : '22px 12px',
+            padding: hasCompared ? '12px 10px 10px 10px' : '22px 12px',
             boxShadow: cheaperService === 'uber' ? '0 4px 16px rgba(16, 185, 129, 0.2)' : '0 4px 12px rgba(0,0,0,0.06)',
             cursor: 'pointer',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '6px',
+            gap: '4px',
             position: 'relative'
           }}
         >
@@ -694,14 +596,19 @@ export default function SmartRideApp() {
             <span style={{ fontSize: '25px', fontWeight: '900', color: '#000000' }}>UberX</span>
           </div>
           {hasCompared && (
-            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
-              {priceUber}
-            </span>
+            <>
+              <span style={{ fontSize: '16px', fontWeight: '850', color: '#044e42', marginTop: '2px' }}>
+                {priceUber}
+              </span>
+              <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b', letterSpacing: '0.01em' }}>
+                estimativa atual
+              </span>
+            </>
           )}
         </button>
       </div>
 
-      {/* Linha discreta de proteção e conferência */}
+      {/* Linha discreta de conferência */}
       {hasCompared && (
         <div style={{ textAlign: 'center', marginBottom: '14px' }}>
           <span style={{ fontSize: '10.5px', color: '#64748b', lineHeight: 1.3 }}>
@@ -781,10 +688,3 @@ export default function SmartRideApp() {
               }}
             >
               Compreendi e Concordo
-            </button>
-          </div>
-        </div>
-      )}
-    </main>
-  )
-}
