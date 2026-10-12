@@ -2,69 +2,54 @@
 
 import React, { useState, useEffect } from 'react'
 
-// Logótipo "S" Cifrão / Seta 3D com Presença Marcante
+// Logotipo Minimalista: Contorno do S com Seta Descendente Prolongada
 const SmartRideBrand = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
-    <svg width="64" height="64" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 6px 14px rgba(0, 168, 107, 0.25))' }}>
+    <svg width="60" height="66" viewBox="0 0 64 74" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 10px rgba(0, 168, 107, 0.2))' }}>
       <defs>
-        {/* Gradiente da Haste / Seta de Economia */}
-        <linearGradient id="arrowStem" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id="sContourGrad" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#00E676" />
-          <stop offset="60%" stopColor="#00A86B" />
-          <stop offset="100%" stopColor="#0369a1" />
+          <stop offset="100%" stopColor="#00A86B" />
         </linearGradient>
-
-        {/* Gradiente das Fitas do "S" */}
-        <linearGradient id="sTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#059669" />
-        </linearGradient>
-
-        <linearGradient id="sMidGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#10b981" />
-          <stop offset="50%" stopColor="#06b6d4" />
-          <stop offset="100%" stopColor="#0284c7" />
-        </linearGradient>
-
-        <linearGradient id="sBotGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#0284c7" />
-          <stop offset="100%" stopColor="#0f766e" />
+        <linearGradient id="arrowDownGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor="#38BDF8" />
+          <stop offset="100%" stopColor="#0284C7" />
         </linearGradient>
       </defs>
 
-      {/* 1. HASTE VERTICAL CENTRAL (Tronco da Seta / Cifrão) */}
-      <rect x="32" y="8" width="8" height="42" rx="4" fill="url(#arrowStem)" />
-
-      {/* 2. CURVA SUPERIOR DO "S" (Passa atrás da haste) */}
-      <path
-        d="M52 20C52 11 40 8 32 8C22 8 16 13 16 22C16 30 26 33 34 35"
-        stroke="url(#sTopGrad)"
-        strokeWidth="9"
+      {/* 1. HASTE VERTICAL DA SETA (Desce até bem embaixo) */}
+      <line
+        x1="32"
+        y1="4"
+        x2="32"
+        y2="60"
+        stroke="url(#arrowDownGrad)"
+        strokeWidth="4"
         strokeLinecap="round"
       />
 
-      {/* 3. CURVA DIAGONAL CENTRAL DO "S" (Passa NA FRENTE da haste, criando o entrelaçamento) */}
+      {/* 2. PONTA DA SETA DESCENDENTE BEM DESTACADA EMBAIXO */}
       <path
-        d="M26 30C34 32 46 36 46 44C46 53 38 57 28 57C22 57 16 54 16 48"
-        stroke="url(#sMidGrad)"
-        strokeWidth="9"
+        d="M23 53L32 66L41 53"
+        stroke="url(#arrowDownGrad)"
+        strokeWidth="4"
         strokeLinecap="round"
-        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.18))' }}
+        strokeLinejoin="round"
       />
 
-      {/* 4. PONTA ROBUSTA DA SETA DESCENDENTE (Economia / Cifrão bem visível) */}
+      {/* 3. CONTORNO ELEGANTE E LIMPO DO "S" (Sem sobreposição confusa) */}
       <path
-        d="M23 44L36 62L49 44H39V40H33V44H23Z"
-        fill="url(#arrowStem)"
-        stroke="#ffffff"
-        strokeWidth="1.5"
+        d="M48 18C44 11 26 11 20 18C14 25 18 33 32 34C46 35 50 43 44 50C38 57 20 57 16 50"
+        stroke="url(#sContourGrad)"
+        strokeWidth="5"
+        strokeLinecap="round"
         strokeLinejoin="round"
       />
     </svg>
 
     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-      <span style={{ fontSize: '27px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>SMART</span>
-      <span style={{ fontSize: '27px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
+      <span style={{ fontSize: '26px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>SMART</span>
+      <span style={{ fontSize: '26px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
     </div>
   </div>
 )
@@ -289,7 +274,7 @@ export default function SmartRideApp() {
       maxWidth: '430px',
       margin: '0 auto'
     }}>
-      {/* Logótipo Superior SMART RIDE com S Cifrão e Seta 3D */}
+      {/* Logotipo Superior Minimalista */}
       <SmartRideBrand />
 
       {/* Bloco de Trajeto */}
@@ -632,53 +617,3 @@ export default function SmartRideApp() {
             minHeight: '94px'
           }}
         >
-          <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '25px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em' }}>
-              UberX
-            </span>
-          </div>
-          {hasCompared && (
-            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
-              {priceUber}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Botão de Comparação */}
-      <button
-        onClick={handleCompare}
-        disabled={isComparing}
-        style={{
-          width: '100%',
-          backgroundColor: hasCompared ? '#0f172a' : '#044e42',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '14px',
-          padding: '14px 16px',
-          fontSize: '15px',
-          fontWeight: '700',
-          cursor: isComparing ? 'wait' : 'pointer',
-          marginBottom: '16px',
-          boxShadow: '0 4px 12px rgba(4, 78, 66, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          transition: 'all 0.2s ease'
-        }}
-      >
-        {isComparing ? (
-          'Buscando tarifas...'
-        ) : hasCompared ? (
-          '🔄 Atualizar Tarifas'
-        ) : (
-          '🔍 Comparar Tarifas'
-        )}
-      </button>
-
-      {/* Assinatura com Moeda de Titânio */}
-      <TitaniumCoin />
-    </main>
-  )
-}
