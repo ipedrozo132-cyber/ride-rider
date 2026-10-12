@@ -2,56 +2,69 @@
 
 import React, { useState, useEffect } from 'react'
 
-// Logótipo Proprietário "S" Cifrão + Seta de Trajeto e Economia
+// Logótipo "S" Cifrão / Seta 3D com Presença Marcante
 const SmartRideBrand = () => (
   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '16px', marginBottom: '24px' }}>
-    <svg width="60" height="60" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 4px 10px rgba(0, 168, 107, 0.22))' }}>
+    <svg width="64" height="64" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ filter: 'drop-shadow(0 6px 14px rgba(0, 168, 107, 0.25))' }}>
       <defs>
-        <linearGradient id="sGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        {/* Gradiente da Haste / Seta de Economia */}
+        <linearGradient id="arrowStem" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#00E676" />
-          <stop offset="50%" stopColor="#00A86B" />
-          <stop offset="100%" stopColor="#044E42" />
+          <stop offset="60%" stopColor="#00A86B" />
+          <stop offset="100%" stopColor="#0369a1" />
         </linearGradient>
-        <linearGradient id="arrowGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" stopColor="#38BDF8" />
-          <stop offset="100%" stopColor="#0284C7" />
+
+        {/* Gradiente das Fitas do "S" */}
+        <linearGradient id="sTopGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#34d399" />
+          <stop offset="100%" stopColor="#059669" />
+        </linearGradient>
+
+        <linearGradient id="sMidGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#10b981" />
+          <stop offset="50%" stopColor="#06b6d4" />
+          <stop offset="100%" stopColor="#0284c7" />
+        </linearGradient>
+
+        <linearGradient id="sBotGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#0284c7" />
+          <stop offset="100%" stopColor="#0f766e" />
         </linearGradient>
       </defs>
 
-      {/* Seta Vertical que atravessa o S formando o Cifrão ($) e a Direção de Queda de Preço */}
-      <line
-        x1="32"
-        y1="6"
-        x2="32"
-        y2="50"
-        stroke="url(#arrowGrad)"
-        strokeWidth="3.5"
-        strokeLinecap="round"
-      />
+      {/* 1. HASTE VERTICAL CENTRAL (Tronco da Seta / Cifrão) */}
+      <rect x="32" y="8" width="8" height="42" rx="4" fill="url(#arrowStem)" />
+
+      {/* 2. CURVA SUPERIOR DO "S" (Passa atrás da haste) */}
       <path
-        d="M27 46L32 54L37 46"
-        stroke="url(#arrowGrad)"
-        strokeWidth="3.5"
+        d="M52 20C52 11 40 8 32 8C22 8 16 13 16 22C16 30 26 33 34 35"
+        stroke="url(#sTopGrad)"
+        strokeWidth="9"
         strokeLinecap="round"
-        strokeLinejoin="round"
       />
 
-      {/* Curvas do "S" com faixas estilizadas de pista/estrada */}
+      {/* 3. CURVA DIAGONAL CENTRAL DO "S" (Passa NA FRENTE da haste, criando o entrelaçamento) */}
       <path
-        d="M45 18C41 12 25 12 21 18C16 25 21 31 32 32C43 33 48 39 43 46C39 52 23 52 19 46"
-        stroke="url(#sGrad)"
-        strokeWidth="5"
+        d="M26 30C34 32 46 36 46 44C46 53 38 57 28 57C22 57 16 54 16 48"
+        stroke="url(#sMidGrad)"
+        strokeWidth="9"
         strokeLinecap="round"
-        strokeLinejoin="round"
+        style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.18))' }}
       />
 
-      {/* Ponto GPS no cruzamento central */}
-      <circle cx="32" cy="32" r="3" fill="#ffffff" stroke="#00A86B" strokeWidth="2" />
+      {/* 4. PONTA ROBUSTA DA SETA DESCENDENTE (Economia / Cifrão bem visível) */}
+      <path
+        d="M23 44L36 62L49 44H39V40H33V44H23Z"
+        fill="url(#arrowStem)"
+        stroke="#ffffff"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+      />
     </svg>
 
     <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
-      <span style={{ fontSize: '26px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>SMART</span>
-      <span style={{ fontSize: '26px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
+      <span style={{ fontSize: '27px', fontWeight: '950', color: '#044e42', letterSpacing: '-0.02em' }}>SMART</span>
+      <span style={{ fontSize: '27px', fontWeight: '950', color: '#00A86B', letterSpacing: '-0.02em', marginTop: '3px' }}>RIDE</span>
     </div>
   </div>
 )
@@ -254,418 +267,4 @@ export default function SmartRideApp() {
   const handle99Click = () => {
     const encodedDest = encodeURIComponent(destinationAddress)
     const pickupTitle = encodeURIComponent(isUsingGps ? 'Minha Localização' : manualPickup)
-    const native99Uri = `taxis99://call?pickup_latitude=-23.2055&pickup_longitude=-45.8841&pickup_title=${pickupTitle}&dropoff_latitude=-23.1896&dropoff_longitude=-45.8841&dropoff_title=${encodedDest}&deep_link_product_id=316`
-    window.location.assign(native99Uri)
-  }
-
-  const svgHeight = stops.length === 2 ? 132 : stops.length === 1 ? 88 : 44
-  const lineY2 = stops.length === 2 ? 122 : stops.length === 1 ? 78 : 34
-  const arrowY = stops.length === 2 ? 121 : stops.length === 1 ? 77 : 33
-  const arrowTipY = stops.length === 2 ? 128 : stops.length === 1 ? 84 : 40
-
-  return (
-    <main style={{
-      minHeight: '100dvh',
-      boxSizing: 'border-box',
-      backgroundColor: '#f8fafc',
-      color: '#0f172a',
-      fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      padding: '24px 20px',
-      display: 'flex',
-      flexDirection: 'column',
-      maxWidth: '430px',
-      margin: '0 auto'
-    }}>
-      {/* Logótipo Superior SMART RIDE com S Cifrão + Seta */}
-      <SmartRideBrand />
-
-      {/* Bloco de Trajeto */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '18px',
-        border: '1px solid #e2e8f0',
-        padding: '16px 14px',
-        boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-        marginBottom: '14px',
-        position: 'relative'
-      }}>
-        <div style={{
-          position: 'absolute',
-          left: '14px',
-          top: '32px',
-          bottom: '34px',
-          width: '14px',
-          display: 'flex',
-          justifyContent: 'center',
-          pointerEvents: 'none'
-        }}>
-          <svg width="14" height="100%" viewBox={`0 0 14 ${svgHeight}`} preserveAspectRatio="none" fill="none">
-            <line
-              x1="7"
-              y1="2"
-              x2="7"
-              y2={lineY2}
-              stroke="#94a3b8"
-              strokeWidth="2"
-              strokeDasharray="3 3"
-              strokeLinecap="round"
-            />
-            <path
-              d={`M3 ${arrowY}L7 ${arrowTipY}L11 ${arrowY}`}
-              stroke="#94a3b8"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-
-        {/* Linha 1: Partida */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
-            <div style={{
-              width: '14px',
-              height: '14px',
-              borderRadius: '50%',
-              backgroundColor: isUsingGps ? '#10b981' : '#38bdf8',
-              boxShadow: isUsingGps ? '0 0 0 3px rgba(16, 185, 129, 0.2)' : '0 0 0 3px rgba(56, 189, 248, 0.2)',
-              flexShrink: 0
-            }} />
-            
-            {isUsingGps ? (
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b' }}>
-                Minha localização atual (GPS)
-              </span>
-            ) : (
-              <input
-                type="text"
-                autoFocus
-                value={manualPickup}
-                onFocus={() => setActiveField('pickup')}
-                onChange={(e) => setManualPickup(e.target.value)}
-                placeholder="Ex: Faculdade, Rodoviária..."
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#0f172a'
-                }}
-              />
-            )}
-          </div>
-
-          <button
-            onClick={toggleGpsMode}
-            style={{
-              border: 'none',
-              backgroundColor: isUsingGps ? '#f1f5f9' : '#ecfdf5',
-              color: isUsingGps ? '#475569' : '#059669',
-              padding: '5px 9px',
-              borderRadius: '8px',
-              fontSize: '11px',
-              fontWeight: '700',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px'
-            }}
-          >
-            {isUsingGps ? '✏️ Alterar' : '🎯 Meu GPS'}
-          </button>
-        </div>
-
-        <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
-
-        {/* Paradas */}
-        {stops.map((stop, index) => (
-          <React.Fragment key={index}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', marginBottom: '14px', position: 'relative' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
-                <div style={{
-                  width: '14px',
-                  height: '14px',
-                  borderRadius: '50%',
-                  backgroundColor: index === 0 ? '#f59e0b' : '#fb923c',
-                  boxShadow: index === 0 ? '0 0 0 3px rgba(245, 158, 11, 0.2)' : '0 0 0 3px rgba(251, 146, 60, 0.2)',
-                  flexShrink: 0
-                }} />
-                <input
-                  type="text"
-                  autoFocus={index === stops.length - 1}
-                  value={stop}
-                  onFocus={() => setActiveField(index)}
-                  onChange={(e) => updateStop(index, e.target.value)}
-                  placeholder={`Parada ${index + 1} (ex: Faculdade, Restaurante...)`}
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    outline: 'none',
-                    background: 'transparent',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#0f172a'
-                  }}
-                />
-              </div>
-
-              <button
-                onClick={() => removeStop(index)}
-                title="Remover parada"
-                style={{
-                  border: 'none',
-                  backgroundColor: '#fee2e2',
-                  color: '#ef4444',
-                  width: '24px',
-                  height: '24px',
-                  borderRadius: '6px',
-                  fontSize: '11px',
-                  fontWeight: '800',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                ✕
-              </button>
-            </div>
-            <div style={{ height: '1px', backgroundColor: '#f1f5f9', marginLeft: '28px', marginBottom: '14px' }} />
-          </React.Fragment>
-        ))}
-
-        {/* Destino */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
-            <div style={{
-              width: '14px',
-              height: '14px',
-              borderRadius: '50%',
-              backgroundColor: '#ef4444',
-              boxShadow: '0 0 0 3px rgba(239, 68, 68, 0.2)',
-              flexShrink: 0
-            }} />
-            <input
-              type="text"
-              value={destinationAddress}
-              onFocus={() => setActiveField('destination')}
-              onChange={(e) => setDestinationAddress(e.target.value)}
-              placeholder="Para onde você quer ir?"
-              style={{
-                width: '100%',
-                border: 'none',
-                outline: 'none',
-                background: 'transparent',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#0f172a'
-              }}
-            />
-          </div>
-
-          {stops.length < 2 && (
-            <button
-              onClick={addStop}
-              style={{
-                border: 'none',
-                backgroundColor: '#f8fafc',
-                borderWidth: '1px',
-                borderColor: '#e2e8f0',
-                borderStyle: 'solid',
-                color: '#044e42',
-                padding: '4px 8px',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '3px'
-              }}
-            >
-              + Parada
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Sugestões Rápidas */}
-      {activeField !== null && (
-        <div style={{
-          backgroundColor: '#ffffff',
-          borderRadius: '14px',
-          border: '1px solid #e2e8f0',
-          padding: '10px 12px',
-          marginBottom: '14px',
-          boxShadow: '0 4px 14px rgba(0,0,0,0.06)'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11.5px', fontWeight: '750', color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              ⚡ Sugestões Rápidas (Toque para preencher)
-            </span>
-            <button
-              onClick={() => setActiveField(null)}
-              style={{ background: 'none', border: 'none', fontSize: '11px', color: '#94a3b8', cursor: 'pointer', fontWeight: 'bold' }}
-            >
-              Fechar ✕
-            </button>
-          </div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-            {savedPlaces.map((place, idx) => (
-              <button
-                key={idx}
-                onClick={() => selectSuggestedPlace(place)}
-                style={{
-                  backgroundColor: '#f1f5f9',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '8px',
-                  padding: '6px 10px',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#1e293b',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px'
-                }}
-              >
-                <span>📍</span>
-                <span>{place}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Cápsula de Telemetria */}
-      {hasCompared && tripTelemetry && (
-        <div style={{
-          backgroundColor: '#f1f5f9',
-          borderRadius: '12px',
-          padding: '10px 14px',
-          marginBottom: '14px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-        }}>
-          <span style={{ fontSize: '13px' }}>📍</span>
-          <span style={{ fontSize: '12.5px', fontWeight: '600', color: '#1e293b' }}>
-            Percurso estimado: <strong style={{ color: '#044e42' }}>{tripTelemetry.distance}</strong> • <strong style={{ color: '#044e42' }}>{tripTelemetry.time}</strong>
-          </span>
-        </div>
-      )}
-
-      {/* Cards 99 e Uber */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '14px' }}>
-        <button
-          onClick={handle99Click}
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '16px',
-            padding: hasCompared ? '16px 12px' : '22px 12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            outline: 'none',
-            minHeight: '94px'
-          }}
-        >
-          <div style={{
-            width: '54px',
-            height: '40px',
-            backgroundColor: '#ffc107',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 2px 5px rgba(0,0,0,0.08)'
-          }}>
-            <span style={{ fontSize: '23px', fontWeight: '950', color: '#000', letterSpacing: '-0.05em' }}>99</span>
-          </div>
-          {hasCompared && (
-            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
-              {price99}
-            </span>
-          )}
-        </button>
-
-        <button
-          onClick={handleUberClick}
-          style={{
-            backgroundColor: '#ffffff',
-            border: '1px solid #e2e8f0',
-            borderRadius: '16px',
-            padding: hasCompared ? '16px 12px' : '22px 12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.06)',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px',
-            outline: 'none',
-            minHeight: '94px'
-          }}
-        >
-          <div style={{ height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '25px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em' }}>
-              UberX
-            </span>
-          </div>
-          {hasCompared && (
-            <span style={{ fontSize: '15px', fontWeight: '800', color: '#044e42' }}>
-              {priceUber}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Botão de Comparação */}
-      <button
-        onClick={handleCompare}
-        disabled={isComparing}
-        style={{
-          width: '100%',
-          backgroundColor: hasCompared ? '#0f172a' : '#044e42',
-          color: '#ffffff',
-          border: 'none',
-          borderRadius: '14px',
-          padding: '14px 16px',
-          fontSize: '15px',
-          fontWeight: '700',
-          cursor: isComparing ? 'wait' : 'pointer',
-          marginBottom: '16px',
-          boxShadow: '0 4px 12px rgba(4, 78, 66, 0.2)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '8px',
-          transition: 'all 0.2s ease'
-        }}
-      >
-        {isComparing ? (
-          'Buscando tarifas...'
-        ) : hasCompared ? (
-          '🔄 Atualizar Tarifas'
-        ) : (
-          '🔍 Comparar Tarifas'
-        )}
-      </button>
-
-      {/* Assinatura com Moeda de Titânio */}
-      <TitaniumCoin />
-    </main>
-  )
-}
+    const native99Uri = `taxis99://call?pickup_latitude=-23.2055&pickup_longitude=-45.8841&pickup_title=${pickupTitle}&dropoff_latitude=-23.1896&dropoff_longitude=-45.8841
