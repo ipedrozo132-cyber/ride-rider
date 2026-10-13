@@ -39,7 +39,7 @@ export default function MakeEasyApp() {
   const [pickupText, setPickupText] = useState('')
   const [pickupCoord, setPickupCoord] = useState<{ lat: number; lng: number }>({ lat: -23.2055, lng: -45.8841 })
 
-  // Parada Intermediária
+  // Paragem Intermédia
   const [hasStop, setHasStop] = useState(false)
   const [stopText, setStopText] = useState('')
   const [stopCoord, setStopCoord] = useState<{ lat: number; lng: number } | null>(null)
@@ -48,7 +48,7 @@ export default function MakeEasyApp() {
   const [destinationText, setDestinationText] = useState('Shopping Centro')
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number }>({ lat: -23.1896, lng: -45.8841 })
 
-  // Telemetria da Rota (Distância e Tempo)
+  // Telemetria do Percurso (Distância e Tempo)
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null)
   const [isLoadingRoute, setIsLoadingRoute] = useState(false)
 
@@ -57,7 +57,7 @@ export default function MakeEasyApp() {
   const [isSearching, setIsSearching] = useState(false)
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_PLACES)
 
-  // Alerta de Parada Copiada
+  // Alerta de Paragem Copiada
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   // Modal de Apoio / Pix
@@ -77,7 +77,7 @@ export default function MakeEasyApp() {
     }
   }, [isUsingGps])
 
-  // Atualiza a telemetria sempre que as coordenadas mudarem
+  // Atualiza a telemetria sempre que as coordenadas forem alteradas
   useEffect(() => {
     const fetchRouteTelemetry = async () => {
       setIsLoadingRoute(true)
@@ -95,7 +95,6 @@ export default function MakeEasyApp() {
           }
         }
       } catch {
-        // Fallback básico caso a API demore
         setRouteInfo(null)
       } finally {
         setIsLoadingRoute(false)
@@ -167,7 +166,7 @@ export default function MakeEasyApp() {
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(stopText.trim())
       }
-      showToast(`📋 Endereço da parada copiado: "${stopText}"! Cole no app para adicionar a parada intermediária.`)
+      showToast(`📋 Endereço da paragem copiado: "${stopText}"! Cole na aplicação para adicionar a paragem pretendida.`)
     }
   }
 
@@ -241,7 +240,7 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Caixa de Rota */}
+      {/* Caixa de Definição de Percurso */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '18px',
@@ -308,7 +307,7 @@ export default function MakeEasyApp() {
           </button>
         </div>
 
-        {/* Ponto 2: Parada Intermediária (Opcional) */}
+        {/* Ponto 2: Paragem Intermédia (Opcional) */}
         {hasStop && (
           <div style={{
             display: 'flex',
@@ -336,7 +335,7 @@ export default function MakeEasyApp() {
                   setStopText(e.target.value)
                   searchAddress(e.target.value)
                 }}
-                placeholder="Parada intermediária..."
+                placeholder="Paragem intermédia..."
                 style={{
                   width: '100%',
                   border: 'none',
@@ -408,7 +407,7 @@ export default function MakeEasyApp() {
           </div>
         </div>
 
-        {/* Botão de Adicionar Parada */}
+        {/* Botão de Adicionar Paragem */}
         {!hasStop && (
           <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
             <button
@@ -434,7 +433,7 @@ export default function MakeEasyApp() {
         )}
       </div>
 
-      {/* Barra de Telemetria de Trajeto (Distância e Tempo) */}
+      {/* Barra de Telemetria de Percurso (Distância e Duração) */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '12px',
@@ -461,7 +460,7 @@ export default function MakeEasyApp() {
         </span>
       </div>
 
-      {/* Resultados de Busca Rápida */}
+      {/* Resultados de Pesquisa Rápida */}
       {activeField !== null && (
         <div style={{
           backgroundColor: '#ffffff',
@@ -473,7 +472,7 @@ export default function MakeEasyApp() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
-              {isSearching ? '🔍 Buscando...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
+              {isSearching ? '🔍 A pesquisar...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
             </span>
             <button
               onClick={() => setActiveField(null)}
@@ -530,7 +529,7 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Botões Centrais de Despacho Rápido */}
+      {/* Botões de Ação Direta */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
         <button
           onClick={handleLaunch99}
@@ -560,7 +559,7 @@ export default function MakeEasyApp() {
             <span style={{ fontSize: '23px', fontWeight: '950', color: '#000000' }}>99</span>
           </div>
           <span style={{ fontSize: '14px', fontWeight: '850', color: '#0f172a' }}>
-            Cotar no 99Pop
+            Cotar no 99
           </span>
           <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b' }}>
             Abre direto com rota
@@ -584,10 +583,10 @@ export default function MakeEasyApp() {
           }}
         >
           <div style={{ height: '40px', display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: '24px', fontWeight: '900', color: '#000000' }}>UberX</span>
+            <span style={{ fontSize: '26px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em' }}>Uber</span>
           </div>
           <span style={{ fontSize: '14px', fontWeight: '850', color: '#0f172a' }}>
-            Cotar no UberX
+            Cotar no Uber
           </span>
           <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b' }}>
             Abre direto com rota
@@ -606,7 +605,7 @@ export default function MakeEasyApp() {
         </span>
       </div>
 
-      {/* Espaço de Banner Publicitário Discreto */}
+      {/* Espaço de Anúncio Discreto */}
       {!isAdFree && (
         <div style={{
           backgroundColor: '#f1f5f9',
@@ -630,7 +629,7 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Botão de Apoio ao Desenvolvedor */}
+      {/* Botão de Apoio Voluntário */}
       <button
         onClick={() => setShowSupportModal(true)}
         style={{
@@ -663,7 +662,7 @@ export default function MakeEasyApp() {
           MAKE EASY UTILITIES
         </span>
         <div style={{ fontSize: '9.5px', color: '#94a3b8', marginTop: '4px' }}>
-          Ferramenta independente de facilitação de rotas • 99Pop e UberX são marcas de suas respectivas empresas
+          Ferramenta independente de facilitação de rotas • 99 e Uber são marcas das respetivas empresas
         </div>
       </footer>
 
@@ -692,7 +691,7 @@ export default function MakeEasyApp() {
               Apoie o Make Easy ☕
             </h3>
             <p style={{ fontSize: '12.5px', color: '#475569', lineHeight: 1.5, textAlign: 'center', margin: '0 0 16px 0' }}>
-              Ajude a manter este utilitário gratuito, rápido e sem anúncios chatos com uma contribuição única voluntária de qualquer valor no Pix!
+              Ajude a manter este utilitário gratuito, rápido e sem anúncios com uma contribuição única voluntária de qualquer valor no Pix!
             </p>
 
             <div style={{
