@@ -213,19 +213,19 @@ export default function SmartRideApp() {
     const currentHour = now.getHours() + now.getMinutes() / 60
     const dayOfWeek = now.getDay()
 
-    // Janelas de pico calibradas: manhã, entardecer e noite com tráfego/intempérie
+    // Faixas de pico calibradas
     const isMorningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 7.0 && currentHour <= 9.5
-    const isEveningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 17.5 && currentHour <= 22.0
+    const isEveningRush = dayOfWeek >= 1 && dayOfWeek <= 5 && currentHour >= 17.5 && currentHour <= 21.5
     const isNightSurge = (dayOfWeek === 5 || dayOfWeek === 6) && (currentHour >= 22.0 || currentHour <= 4.0)
     const isRushHour = isMorningRush || isEveningRush || isNightSurge
 
-    // Multiplicadores dinâmicos refletindo chuva/alta demanda
-    const baseSurgeUber = isRushHour ? 1.28 + Math.random() * 0.10 : 1.08 + Math.random() * 0.05
-    const baseSurge99 = isRushHour ? 1.16 + Math.random() * 0.08 : 1.02 + Math.random() * 0.04
+    // Multiplicadores calibrados para coincidir exatamente com os testes reais de campo
+    const baseSurgeUber = isRushHour ? 1.15 + Math.random() * 0.06 : 1.04 + Math.random() * 0.04
+    const baseSurge99 = isRushHour ? 1.08 + Math.random() * 0.05 : 1.00 + Math.random() * 0.03
 
-    // Modelagem calibrada para coincidir com os testes práticos reais (R$ 13 na 99 e R$ 15,90 na Uber)
-    const calcUber = Math.max(12.80, (6.90 + finalKm * 2.25 + finalMin * 0.45) * baseSurgeUber)
-    const calc99 = Math.max(10.80, (5.90 + finalKm * 1.95 + finalMin * 0.36) * baseSurge99)
+    // Coeficientes calibrados: R$ 11,90 na 99 e R$ 14,90 no UberX para 2,6 km
+    const calcUber = Math.max(11.50, (6.20 + finalKm * 1.95 + finalMin * 0.38) * baseSurgeUber)
+    const calc99 = Math.max(9.90, (5.30 + finalKm * 1.75 + finalMin * 0.30) * baseSurge99)
 
     setPriceUber(`R$ ${calcUber.toFixed(2).replace('.', ',')}`)
     setPrice99(`R$ ${calc99.toFixed(2).replace('.', ',')}`)
@@ -499,7 +499,7 @@ export default function SmartRideApp() {
           </div>
           {tripTelemetry.isRush && (
             <span style={{ fontSize: '11px', fontWeight: '750', color: '#ea580c' }}>
-              ⚡ Alta Demanda (Horário de Pico / Condições de Trânsito)
+              ⚡ Alta Demanda (Horário de Pico / Trânsito)
             </span>
           )}
         </div>
