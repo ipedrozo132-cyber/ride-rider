@@ -39,7 +39,7 @@ export default function MakeEasyApp() {
   const [pickupText, setPickupText] = useState('')
   const [pickupCoord, setPickupCoord] = useState<{ lat: number; lng: number }>({ lat: -23.2055, lng: -45.8841 })
 
-  // Paragem Intermédia
+  // Parada Intermediária
   const [hasStop, setHasStop] = useState(false)
   const [stopText, setStopText] = useState('')
   const [stopCoord, setStopCoord] = useState<{ lat: number; lng: number } | null>(null)
@@ -57,7 +57,7 @@ export default function MakeEasyApp() {
   const [isSearching, setIsSearching] = useState(false)
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_PLACES)
 
-  // Alerta de Paragem Copiada
+  // Alerta de Parada Copiada
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   // Modal de Apoio / Pix
@@ -166,7 +166,7 @@ export default function MakeEasyApp() {
       if (typeof navigator !== 'undefined' && navigator.clipboard) {
         navigator.clipboard.writeText(stopText.trim())
       }
-      showToast(`📋 Endereço da paragem copiado: "${stopText}"! Cole na aplicação para adicionar a paragem pretendida.`)
+      showToast(`📋 Endereço da parada copiado: "${stopText}"! Cole no app para adicionar a parada.`)
     }
   }
 
@@ -240,7 +240,7 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Caixa de Definição de Percurso */}
+      {/* Caixa de Rota */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '18px',
@@ -307,7 +307,7 @@ export default function MakeEasyApp() {
           </button>
         </div>
 
-        {/* Ponto 2: Paragem Intermédia (Opcional) */}
+        {/* Ponto 2: Parada Intermediária (Opcional) */}
         {hasStop && (
           <div style={{
             display: 'flex',
@@ -335,7 +335,7 @@ export default function MakeEasyApp() {
                   setStopText(e.target.value)
                   searchAddress(e.target.value)
                 }}
-                placeholder="Paragem intermédia..."
+                placeholder="Parada intermediária..."
                 style={{
                   width: '100%',
                   border: 'none',
@@ -407,7 +407,7 @@ export default function MakeEasyApp() {
           </div>
         </div>
 
-        {/* Botão de Adicionar Paragem */}
+        {/* Botão de Adicionar Parada */}
         {!hasStop && (
           <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
             <button
@@ -433,13 +433,13 @@ export default function MakeEasyApp() {
         )}
       </div>
 
-      {/* Barra de Telemetria de Percurso (Distância e Duração) */}
+      {/* Barra de Telemetria de Percurso */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '12px',
         border: '1px solid #e2e8f0',
         padding: '9px 12px',
-        marginBottom: '14px',
+        marginBottom: '16px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -472,7 +472,7 @@ export default function MakeEasyApp() {
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
-              {isSearching ? '🔍 A pesquisar...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
+              {isSearching ? '🔍 Buscando...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
             </span>
             <button
               onClick={() => setActiveField(null)}
@@ -529,41 +529,44 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Botões de Ação Direta */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+      {/* Cabeçalho de Cotação Unificado */}
+      <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+        <span style={{ fontSize: '13px', fontWeight: '900', color: '#0f172a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+          Cotar
+        </span>
+        <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '1px' }}>
+          Abre direto com rota
+        </div>
+      </div>
+
+      {/* Botões Centrais de Marca em Destaque */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
         <button
           onClick={handleLaunch99}
           style={{
             backgroundColor: '#ffffff',
             border: '2px solid #ffc107',
             borderRadius: '16px',
-            padding: '16px 10px',
+            padding: '20px 10px',
             boxShadow: '0 4px 12px rgba(255, 193, 7, 0.15)',
             cursor: 'pointer',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px'
+            minHeight: '85px'
           }}
         >
           <div style={{
-            width: '54px',
-            height: '40px',
+            width: '64px',
+            height: '46px',
             backgroundColor: '#ffc107',
-            borderRadius: '12px',
+            borderRadius: '14px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
           }}>
-            <span style={{ fontSize: '23px', fontWeight: '950', color: '#000000' }}>99</span>
+            <span style={{ fontSize: '28px', fontWeight: '950', color: '#000000' }}>99</span>
           </div>
-          <span style={{ fontSize: '14px', fontWeight: '850', color: '#0f172a' }}>
-            Cotar no 99
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b' }}>
-            Abre direto com rota
-          </span>
         </button>
 
         <button
@@ -572,24 +575,17 @@ export default function MakeEasyApp() {
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
             borderRadius: '16px',
-            padding: '16px 10px',
+            padding: '20px 10px',
             boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
             cursor: 'pointer',
             display: 'flex',
-            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '8px'
+            minHeight: '85px'
           }}
         >
-          <div style={{ height: '40px', display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: '26px', fontWeight: '900', color: '#000000', letterSpacing: '-0.02em' }}>Uber</span>
-          </div>
-          <span style={{ fontSize: '14px', fontWeight: '850', color: '#0f172a' }}>
-            Cotar no Uber
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b' }}>
-            Abre direto com rota
+          <span style={{ fontSize: '32px', fontWeight: '900', color: '#000000', letterSpacing: '-0.03em' }}>
+            Uber
           </span>
         </button>
       </div>
@@ -605,7 +601,7 @@ export default function MakeEasyApp() {
         </span>
       </div>
 
-      {/* Espaço de Anúncio Discreto */}
+      {/* Espaço de Banner Publicitário Discreto */}
       {!isAdFree && (
         <div style={{
           backgroundColor: '#f1f5f9',
@@ -662,7 +658,7 @@ export default function MakeEasyApp() {
           MAKE EASY UTILITIES
         </span>
         <div style={{ fontSize: '9.5px', color: '#94a3b8', marginTop: '4px' }}>
-          Ferramenta independente de facilitação de rotas • 99 e Uber são marcas das respetivas empresas
+          Ferramenta independente de facilitação de rotas • 99 e Uber são marcas de suas respectivas empresas
         </div>
       </footer>
 
