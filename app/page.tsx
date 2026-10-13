@@ -48,6 +48,10 @@ export default function MakeEasyApp() {
   const [destinationText, setDestinationText] = useState('Shopping Centro')
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number }>({ lat: -23.1896, lng: -45.8841 })
 
+  // Telemetria da Rota (Distância e Tempo)
+  const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null)
+  const [isLoadingRoute, setIsLoadingRoute] = useState(false)
+
   const [activeField, setActiveField] = useState<'pickup' | 'stop' | 'destination' | null>(null)
   const [searchResults, setSearchResults] = useState<{ name: string; address: string; lat: number; lng: number }[]>([])
   const [isSearching, setIsSearching] = useState(false)
@@ -72,6 +76,36 @@ export default function MakeEasyApp() {
       )
     }
   }, [isUsingGps])
+
+  // Atualiza a telemetria sempre que as coordenadas mudarem
+  useEffect(() => {
+    const fetchRouteTelemetry = async () => {
+      setIsLoadingRoute(true)
+      try {
+        const res = await fetch(
+          `/api/route-calc?startLat=${pickupCoord.lat}&startLng=${pickupCoord.lng}&endLat=${destCoord.lat}&endLng=${destCoord.lng}`
+        )
+        if (res.ok) {
+          const data = await res.json()
+          if (data.distanceKm && data.durationMinutes) {
+            setRouteInfo({
+              distance: `aproximadamente ${data.distanceKm.toFixed(1).replace('.', ',')} km`,
+              duration: `${data.durationMinutes} min`
+            })
+          }
+        }
+      } catch {
+        // Fallback básico caso a API demore
+        setRouteInfo(null)
+      } finally {
+        setIsLoadingRoute(false)
+      }
+    }
+
+    if (pickupCoord && destCoord) {
+      fetchRouteTelemetry()
+    }
+  }, [pickupCoord, destCoord])
 
   const showToast = (msg: string) => {
     setToastMessage(msg)
@@ -158,7 +192,6 @@ export default function MakeEasyApp() {
   }
 
   const copyPixCode = () => {
-    // Chave Pix aleatória / demonstrativa configurável
     const pixPayload = 'contato@makeeasy.app'
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(pixPayload)
@@ -215,7 +248,7 @@ export default function MakeEasyApp() {
         border: '1px solid #e2e8f0',
         padding: '16px 14px',
         boxShadow: '0 2px 10px rgba(0,0,0,0.04)',
-        marginBottom: '14px',
+        marginBottom: '10px',
         position: 'relative'
       }}>
         {/* Ponto 1: Partida */}
@@ -401,6 +434,33 @@ export default function MakeEasyApp() {
         )}
       </div>
 
+      {/* Barra de Telemetria de Trajeto (Distância e Tempo) */}
+      <div style={{
+        backgroundColor: '#ffffff',
+        borderRadius: '12px',
+        border: '1px solid #e2e8f0',
+        padding: '9px 12px',
+        marginBottom: '14px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
+      }}>
+        <span style={{ fontSize: '13px' }}>📍</span>
+        <span style={{ fontSize: '12px', fontWeight: '600', color: '#334155' }}>
+          {isLoadingRoute ? (
+            'Calculando trajeto...'
+          ) : routeInfo ? (
+            <>
+              Percurso: <strong style={{ color: '#0f172a' }}>{routeInfo.distance}</strong> • Duração estimada: <strong style={{ color: '#0f172a' }}>{routeInfo.duration}</strong>
+            </>
+          ) : (
+            'Percurso: calculando coordenadas...'
+          )}
+        </span>
+      </div>
+
       {/* Resultados de Busca Rápida */}
       {activeField !== null && (
         <div style={{
@@ -470,225 +530,4 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Botões Centrais de Despacho Rápido */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-        <button
-          onClick={handleLaunch99}
-          style={{
-            backgroundColor: '#ffffff',
-            border: '2px solid #ffc107',
-            borderRadius: '16px',
-            padding: '16px 10px',
-            boxShadow: '0 4px 12px rgba(255, 193, 7, 0.15)',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
-          }}
-        >
-          <div style={{
-            width: '54px',
-            height: '40px',
-            backgroundColor: '#ffc107',
-            borderRadius: '12px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}>
-            <span style={{ fontSize: '23px', fontWeight: '950', color: '#000000' }}>99</span>
-          </div>
-          <span style={{ fontSize: '14px', fontWeight: '850', color: '#0f172a' }}>
-            Cotar no 99Pop
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b' }}>
-            Abre direto com rota
-          </span>
-        </button>
-
-        <button
-          onClick={handleLaunchUber}
-          style={{
-            backgroundColor: '#ffffff',
-            border: '2px solid #000000',
-            borderRadius: '16px',
-            padding: '16px 10px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.08)',
-            cursor: 'pointer',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '8px'
-          }}
-        >
-          <div style={{ height: '40px', display: 'flex', alignItems: 'center' }}>
-            <span style={{ fontSize: '24px', fontWeight: '900', color: '#000000' }}>UberX</span>
-          </div>
-          <span style={{ fontSize: '14px', fontWeight: '850', color: '#0f172a' }}>
-            Cotar no UberX
-          </span>
-          <span style={{ fontSize: '10px', fontWeight: '600', color: '#64748b' }}>
-            Abre direto com rota
-          </span>
-        </button>
-      </div>
-
-      {/* Orientação Prática */}
-      <div style={{
-        textAlign: 'center',
-        padding: '0 10px',
-        marginBottom: '24px'
-      }}>
-        <span style={{ fontSize: '11.6px', color: '#64748b', lineHeight: 1.5 }}>
-          💡 <strong>Praticidade Make Easy:</strong> Monte seu percurso uma única vez e abra cada operadora em 1 clique para conferir a tarifa final em tempo real.
-        </span>
-      </div>
-
-      {/* Espaço de Banner Publicitário Discreto */}
-      {!isAdFree && (
-        <div style={{
-          backgroundColor: '#f1f5f9',
-          border: '1px dashed #cbd5e1',
-          borderRadius: '12px',
-          padding: '14px 12px',
-          textAlign: 'center',
-          marginBottom: '18px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '4px'
-        }}>
-          <span style={{ fontSize: '9.5px', fontWeight: '800', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Espaço Publicitário
-          </span>
-          <span style={{ fontSize: '12px', color: '#475569', fontWeight: '600' }}>
-            Anúncio Discreto Padrão • Apoie o criador abaixo
-          </span>
-        </div>
-      )}
-
-      {/* Botão de Apoio ao Desenvolvedor */}
-      <button
-        onClick={() => setShowSupportModal(true)}
-        style={{
-          background: 'none',
-          border: '1px solid #e2e8f0',
-          borderRadius: '12px',
-          padding: '10px',
-          color: '#2563eb',
-          fontSize: '12px',
-          fontWeight: '700',
-          cursor: 'pointer',
-          marginBottom: 'auto',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '6px'
-        }}
-      >
-        ☕ Gostou da praticidade? Apoie o projeto e remova anúncios
-      </button>
-
-      {/* Rodapé Make Easy */}
-      <footer style={{
-        textAlign: 'center',
-        paddingTop: '24px',
-        borderTop: '1px solid #e2e8f0',
-        marginTop: '20px'
-      }}>
-        <span style={{ fontSize: '11px', fontWeight: '750', color: '#334155' }}>
-          MAKE EASY UTILITIES
-        </span>
-        <div style={{ fontSize: '9.5px', color: '#94a3b8', marginTop: '4px' }}>
-          Ferramenta independente de facilitação de rotas • 99Pop e UberX são marcas de suas respectivas empresas
-        </div>
-      </footer>
-
-      {/* Modal de Apoio / Pix */}
-      {showSupportModal && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(3px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-          zIndex: 9999
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '18px',
-            padding: '22px',
-            maxWidth: '360px',
-            width: '100%',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)'
-          }}>
-            <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '800', color: '#0f172a', textAlign: 'center' }}>
-              Apoie o Make Easy ☕
-            </h3>
-            <p style={{ fontSize: '12.5px', color: '#475569', lineHeight: 1.5, textAlign: 'center', margin: '0 0 16px 0' }}>
-              Ajude a manter este utilitário gratuito, rápido e sem anúncios chatos com uma contribuição única voluntária de qualquer valor no Pix!
-            </p>
-
-            <div style={{
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              padding: '10px',
-              textAlign: 'center',
-              marginBottom: '14px'
-            }}>
-              <span style={{ fontSize: '10.5px', color: '#64748b', display: 'block', marginBottom: '4px' }}>
-                Chave Pix (E-mail):
-              </span>
-              <strong style={{ fontSize: '13px', color: '#0f172a' }}>contato@makeeasy.app</strong>
-            </div>
-
-            <button
-              onClick={copyPixCode}
-              style={{
-                width: '100%',
-                backgroundColor: pixCopied ? '#10b981' : '#2563eb',
-                color: '#ffffff',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '10px',
-                fontSize: '13px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                marginBottom: '8px'
-              }}
-            >
-              {pixCopied ? '✓ Chave Copiada!' : 'Copiar Chave Pix'}
-            </button>
-
-            <button
-              onClick={() => {
-                setIsAdFree(true)
-                setShowSupportModal(false)
-              }}
-              style={{
-                width: '100%',
-                backgroundColor: '#f1f5f9',
-                color: '#475569',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '10px',
-                fontSize: '12px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}
-            >
-              Fechar
-            </button>
-          </div>
-        </div>
-      )}
-    </main>
-  )
-}
+      {
