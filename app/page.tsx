@@ -48,7 +48,7 @@ export default function MakeEasyApp() {
   const [destinationText, setDestinationText] = useState('Shopping Centro')
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number }>({ lat: -23.1896, lng: -45.8841 })
 
-  // Telemetria do Percurso (Distância e Tempo)
+  // Telemetria do Percurso
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null)
   const [isLoadingRoute, setIsLoadingRoute] = useState(false)
 
@@ -57,7 +57,7 @@ export default function MakeEasyApp() {
   const [isSearching, setIsSearching] = useState(false)
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_PLACES)
 
-  // Alerta de Parada Copiada
+  // Alerta Flutuante
   const [toastMessage, setToastMessage] = useState<string | null>(null)
 
   // Modal de Apoio / Pix
@@ -77,7 +77,6 @@ export default function MakeEasyApp() {
     }
   }, [isUsingGps])
 
-  // Atualiza a telemetria sempre que as coordenadas forem alteradas
   useEffect(() => {
     const fetchRouteTelemetry = async () => {
       setIsLoadingRoute(true)
@@ -120,7 +119,9 @@ export default function MakeEasyApp() {
     }
     setIsSearching(true)
     try {
-      const res = await fetch(`/api/geocode?q=${encodeURIComponent(text)}`)
+      const res = await fetch(
+        `/api/geocode?q=${encodeURIComponent(text)}&lat=${pickupCoord.lat}&lng=${pickupCoord.lng}`
+      )
       if (res.ok) {
         const data = await res.json()
         setSearchResults(data.results || [])
@@ -182,12 +183,23 @@ export default function MakeEasyApp() {
     window.location.assign(uri)
   }
 
+  // Ajustado com compatibilidade explícita para iOS (iPhone) e Android
   const handleLaunch99 = () => {
     handleCopyStopAndNotify()
     const encodedDest = encodeURIComponent(destinationText)
     const pTitle = encodeURIComponent(isUsingGps ? 'Meu Local' : pickupText)
-    const native99Uri = `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
-    window.location.assign(native99Uri)
+
+    const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
+
+    if (isIos) {
+      // Formato compatível com o aplicativo da 99 no iOS para abrir direto a tela de estimativa
+      const iosUri = `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316&source=client`
+      window.location.href = iosUri
+    } else {
+      // Android
+      const native99Uri = `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
+      window.location.assign(native99Uri)
+    }
   }
 
   const copyPixCode = () => {
@@ -215,7 +227,7 @@ export default function MakeEasyApp() {
     }}>
       <MakeEasyBrand />
 
-      {/* Notificação Toast Flutuante */}
+      {/* Notificação Flutuante */}
       {toastMessage && (
         <div style={{
           position: 'fixed',
@@ -433,7 +445,7 @@ export default function MakeEasyApp() {
         )}
       </div>
 
-      {/* Barra de Telemetria de Percurso */}
+      {/* Telemetria do Percurso */}
       <div style={{
         backgroundColor: '#ffffff',
         borderRadius: '12px',
@@ -460,23 +472,52 @@ export default function MakeEasyApp() {
         </span>
       </div>
 
-      {/* Resultados de Pesquisa Rápida */}
+      {/* Painel de Sugestões de Endereço */}
       {activeField !== null && (
         <div style={{
           backgroundColor: '#ffffff',
           borderRadius: '14px',
-          border: '1px solid #e2e8f0',
+          border: '1px solid #cbd5e1',
           padding: '12px',
           marginBottom: '14px',
-          boxShadow: '0 6px 16px rgba(0,0,0,0.08)'
+          boxShadow: '0 8px 20px rgba(0,0,0,0.1)'
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-            <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', textTransform: 'uppercase' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '10px',
+            gap: '8px'
+          }}>
+            <span style={{
+              fontSize: '11px',
+              fontWeight: '800',
+              color: '#64748b',
+              textTransform: 'uppercase',
+              flex: 1,
+              minWidth: 0,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}>
               {isSearching ? '🔍 Buscando...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
             </span>
+
             <button
+              type="button"
               onClick={() => setActiveField(null)}
-              style={{ background: 'none', border: 'none', fontSize: '11px', color: '#94a3b8', cursor: 'pointer', fontWeight: 'bold' }}
+              style={{
+                flexShrink: 0,
+                backgroundColor: '#f1f5f9',
+                border: '1px solid #cbd5e1',
+                borderRadius: '8px',
+                padding: '4px 10px',
+                fontSize: '11.5px',
+                fontWeight: '700',
+                color: '#334155',
+                cursor: 'pointer',
+                WebkitAppearance: 'none'
+              }}
             >
               Fechar ✕
             </button>
@@ -487,6 +528,7 @@ export default function MakeEasyApp() {
               {searchResults.map((res, i) => (
                 <button
                   key={i}
+                  type="button"
                   onClick={() => handleSelectLocation(res)}
                   style={{
                     textAlign: 'left',
@@ -494,7 +536,9 @@ export default function MakeEasyApp() {
                     backgroundColor: '#f8fafc',
                     border: '1px solid #e2e8f0',
                     borderRadius: '8px',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    width: '100%',
+                    WebkitAppearance: 'none'
                   }}
                 >
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#0f172a' }}>{res.name}</div>
@@ -509,6 +553,7 @@ export default function MakeEasyApp() {
               {savedPlaces.map((place, idx) => (
                 <button
                   key={idx}
+                  type="button"
                   onClick={() => handleSelectLocation({ name: place, lat: -23.1896, lng: -45.8841 })}
                   style={{
                     backgroundColor: '#f1f5f9',
@@ -518,7 +563,8 @@ export default function MakeEasyApp() {
                     fontSize: '12px',
                     fontWeight: '600',
                     color: '#1e293b',
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    WebkitAppearance: 'none'
                   }}
                 >
                   📍 {place}
@@ -529,7 +575,7 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Cabeçalho de Cotação Unificado */}
+      {/* Cabeçalho de Cotação */}
       <div style={{ textAlign: 'center', marginBottom: '10px' }}>
         <span style={{ fontSize: '13px', fontWeight: '900', color: '#0f172a', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
           Cotar
@@ -539,7 +585,7 @@ export default function MakeEasyApp() {
         </div>
       </div>
 
-      {/* Botões Centrais de Marca em Destaque */}
+      {/* Botões Centrais */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
         <button
           onClick={handleLaunch99}
@@ -590,7 +636,7 @@ export default function MakeEasyApp() {
         </button>
       </div>
 
-      {/* Orientação Prática */}
+      {/* Orientação */}
       <div style={{
         textAlign: 'center',
         padding: '0 10px',
@@ -601,7 +647,7 @@ export default function MakeEasyApp() {
         </span>
       </div>
 
-      {/* Espaço de Banner Publicitário Discreto */}
+      {/* Anúncio Discreto */}
       {!isAdFree && (
         <div style={{
           backgroundColor: '#f1f5f9',
@@ -625,7 +671,7 @@ export default function MakeEasyApp() {
         </div>
       )}
 
-      {/* Botão de Apoio Voluntário */}
+      {/* Apoio Voluntário */}
       <button
         onClick={() => setShowSupportModal(true)}
         style={{
@@ -647,7 +693,7 @@ export default function MakeEasyApp() {
         ☕ Gostou da praticidade? Apoie o projeto e remova anúncios
       </button>
 
-      {/* Rodapé Make Easy */}
+      {/* Rodapé */}
       <footer style={{
         textAlign: 'center',
         paddingTop: '24px',
@@ -662,7 +708,7 @@ export default function MakeEasyApp() {
         </div>
       </footer>
 
-      {/* Modal de Apoio / Pix */}
+      {/* Modal Pix */}
       {showSupportModal && (
         <div style={{
           position: 'fixed',
