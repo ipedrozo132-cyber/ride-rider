@@ -44,9 +44,9 @@ export default function MakeEasyApp() {
   const [stopText, setStopText] = useState('')
   const [stopCoord, setStopCoord] = useState<{ lat: number; lng: number } | null>(null)
 
-  // Destino Final
-  const [destinationText, setDestinationText] = useState('Shopping Centro')
-  const [destCoord, setDestCoord] = useState<{ lat: number; lng: number }>({ lat: -23.1896, lng: -45.8841 })
+  // Destino Final (Inicia em branco)
+  const [destinationText, setDestinationText] = useState('')
+  const [destCoord, setDestCoord] = useState<{ lat: number; lng: number } | null>(null)
 
   // Telemetria do Percurso
   const [routeInfo, setRouteInfo] = useState<{ distance: string; duration: string } | null>(null)
@@ -56,6 +56,9 @@ export default function MakeEasyApp() {
   const [searchResults, setSearchResults] = useState<{ name: string; address: string; lat: number; lng: number }[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_PLACES)
+
+  // Controle do Visor de Cotação com Barra de Retorno
+  const [activeViewer, setActiveViewer] = useState<{ provider: 'uber' | '99'; url: string; nativeUri: string } | null>(null)
 
   // Alerta Flutuante
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -79,6 +82,11 @@ export default function MakeEasyApp() {
 
   useEffect(() => {
     const fetchRouteTelemetry = async () => {
+      if (!destCoord) {
+        setRouteInfo(null)
+        return
+      }
+
       setIsLoadingRoute(true)
       try {
         const res = await fetch(
@@ -102,6 +110,8 @@ export default function MakeEasyApp() {
 
     if (pickupCoord && destCoord) {
       fetchRouteTelemetry()
+    } else {
+      setRouteInfo(null)
     }
   }, [pickupCoord, destCoord])
 
@@ -113,7 +123,7 @@ export default function MakeEasyApp() {
   }
 
   const searchAddress = async (text: string) => {
-    if (text.trim().length < 3) {
+    if (text.trim().length < 2) {
       setSearchResults([])
       return
     }
@@ -171,35 +181,58 @@ export default function MakeEasyApp() {
     }
   }
 
-  const handleLaunchUber = () => {
+  const handleOpenUberViewer = () => {
+    if (!destinationText.trim() || !destCoord) {
+      showToast('⚠️ Por favor, digite e selecione o destino primeiro!')
+      setActiveField('destination')
+      return
+    }
+
     handleCopyStopAndNotify()
     const encodedDest = encodeURIComponent(destinationText)
-    let uri = `uber://?action=setPickup&dropoff[latitude]=${destCoord.lat}&dropoff[longitude]=${destCoord.lng}&dropoff[formatted_address]=${encodedDest}`
+    
+    // URL web para visualização integrada
+    const webUrl = `https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=${destCoord.lat}&dropoff[longitude]=${destCoord.lng}&dropoff[formatted_address]=${encodedDest}`
+    
+    // URI nativa para caso o usuário queira alternar pro app oficial
+    let nativeUri = `uber://?action=setPickup&dropoff[latitude]=${destCoord.lat}&dropoff[longitude]=${destCoord.lng}&dropoff[formatted_address]=${encodedDest}`
     if (isUsingGps) {
-      uri += '&pickup=my_location'
+      nativeUri += '&pickup=my_location'
     } else {
-      uri += `&pickup[latitude]=${pickupCoord.lat}&pickup[longitude]=${pickupCoord.lng}&pickup[formatted_address]=${encodeURIComponent(pickupText)}`
+      nativeUri += `&pickup[latitude]=${pickupCoord.lat}&pickup[longitude]=${pickupCoord.lng}&pickup[formatted_address]=${encodeURIComponent(pickupText)}`
     }
-    window.location.assign(uri)
+
+    setActiveViewer({
+      provider: 'uber',
+      url: webUrl,
+      nativeUri
+    })
   }
 
-  // Ajustado com compatibilidade explícita para iOS (iPhone) e Android
-  const handleLaunch99 = () => {
+  const handleOpen99Viewer = () => {
+    if (!destinationText.trim() || !destCoord) {
+      showToast('⚠️ Por favor, digite e selecione o destino primeiro!')
+      setActiveField('destination')
+      return
+    }
+
     handleCopyStopAndNotify()
     const encodedDest = encodeURIComponent(destinationText)
     const pTitle = encodeURIComponent(isUsingGps ? 'Meu Local' : pickupText)
 
     const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
+    const nativeUri = isIos
+      ? `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316&source=client`
+      : `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
 
-    if (isIos) {
-      // Formato compatível com o aplicativo da 99 no iOS para abrir direto a tela de estimativa
-      const iosUri = `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316&source=client`
-      window.location.href = iosUri
-    } else {
-      // Android
-      const native99Uri = `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
-      window.location.assign(native99Uri)
-    }
+    // Visor web da 99
+    const webUrl = `https://page.didiglobal.com/passenger/passenger-share/order-price-detail?dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}`
+
+    setActiveViewer({
+      provider: '99',
+      url: webUrl,
+      nativeUri
+    })
   }
 
   const copyPixCode = () => {
@@ -226,6 +259,86 @@ export default function MakeEasyApp() {
       position: 'relative'
     }}>
       <MakeEasyBrand />
+
+      {/* Visor em Tela Cheia com Botão de Voltar Integrado */}
+      {activeViewer && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: '#ffffff',
+          zIndex: 99999,
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          {/* Barra Superior com Botão de Retorno */}
+          <div style={{
+            height: '56px',
+            backgroundColor: activeViewer.provider === '99' ? '#ffc107' : '#000000',
+            color: activeViewer.provider === '99' ? '#000000' : '#ffffff',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '0 12px',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.15)',
+            flexShrink: 0
+          }}>
+            {/* Botão de Retorno Chamativo */}
+            <button
+              onClick={() => setActiveViewer(null)}
+              style={{
+                backgroundColor: activeViewer.provider === '99' ? '#000000' : '#ffffff',
+                color: activeViewer.provider === '99' ? '#ffffff' : '#000000',
+                border: 'none',
+                borderRadius: '10px',
+                padding: '8px 14px',
+                fontSize: '13px',
+                fontWeight: '800',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              ◀ Voltar ao Make Easy
+            </button>
+
+            <span style={{ fontSize: '13px', fontWeight: '850', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Cotação {activeViewer.provider === '99' ? '99' : 'Uber'}
+            </span>
+
+            {/* Alternativa para abrir no aplicativo caso prefira */}
+            <button
+              onClick={() => {
+                window.location.assign(activeViewer.nativeUri)
+              }}
+              style={{
+                background: 'none',
+                border: '1px solid currentColor',
+                borderRadius: '8px',
+                padding: '6px 8px',
+                fontSize: '10px',
+                fontWeight: '700',
+                color: 'inherit',
+                cursor: 'pointer'
+              }}
+            >
+              Abrir no App
+            </button>
+          </div>
+
+          {/* Área do Navegador Integrado */}
+          <iframe
+            src={activeViewer.url}
+            title="Cotação de Corrida"
+            style={{
+              width: '100%',
+              flex: 1,
+              border: 'none',
+              backgroundColor: '#ffffff'
+            }}
+          />
+        </div>
+      )}
 
       {/* Notificação Flutuante */}
       {toastMessage && (
@@ -446,31 +559,33 @@ export default function MakeEasyApp() {
       </div>
 
       {/* Telemetria do Percurso */}
-      <div style={{
-        backgroundColor: '#ffffff',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        padding: '9px 12px',
-        marginBottom: '16px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
-      }}>
-        <span style={{ fontSize: '13px' }}>📍</span>
-        <span style={{ fontSize: '12px', fontWeight: '600', color: '#334155' }}>
-          {isLoadingRoute ? (
-            'Calculando trajeto...'
-          ) : routeInfo ? (
-            <>
-              Percurso: <strong style={{ color: '#0f172a' }}>{routeInfo.distance}</strong> • Duração estimada: <strong style={{ color: '#0f172a' }}>{routeInfo.duration}</strong>
-            </>
-          ) : (
-            'Percurso: calculando coordenadas...'
-          )}
-        </span>
-      </div>
+      {destinationText.trim() && (
+        <div style={{
+          backgroundColor: '#ffffff',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          padding: '9px 12px',
+          marginBottom: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
+          boxShadow: '0 1px 4px rgba(0,0,0,0.03)'
+        }}>
+          <span style={{ fontSize: '13px' }}>📍</span>
+          <span style={{ fontSize: '12px', fontWeight: '600', color: '#334155' }}>
+            {isLoadingRoute ? (
+              'Calculando trajeto...'
+            ) : routeInfo ? (
+              <>
+                Percurso: <strong style={{ color: '#0f172a' }}>{routeInfo.distance}</strong> • Duração estimada: <strong style={{ color: '#0f172a' }}>{routeInfo.duration}</strong>
+              </>
+            ) : (
+              'Selecione uma sugestão de endereço abaixo'
+            )}
+          </span>
+        </div>
+      )}
 
       {/* Painel de Sugestões de Endereço */}
       {activeField !== null && (
@@ -581,14 +696,14 @@ export default function MakeEasyApp() {
           Cotar
         </span>
         <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '1px' }}>
-          Abre direto com rota
+          Toque para ver a tarifa com botão de retorno
         </div>
       </div>
 
       {/* Botões Centrais */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
         <button
-          onClick={handleLaunch99}
+          onClick={handleOpen99Viewer}
           style={{
             backgroundColor: '#ffffff',
             border: '2px solid #ffc107',
@@ -616,7 +731,7 @@ export default function MakeEasyApp() {
         </button>
 
         <button
-          onClick={handleLaunchUber}
+          onClick={handleOpenUberViewer}
           style={{
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
@@ -643,11 +758,11 @@ export default function MakeEasyApp() {
         marginBottom: '24px'
       }}>
         <span style={{ fontSize: '11.6px', color: '#64748b', lineHeight: 1.5 }}>
-          💡 <strong>Praticidade Make Easy:</strong> Monte seu percurso uma única vez e abra cada operadora em 1 clique para conferir a tarifa final em tempo real.
+          💡 <strong>Praticidade Make Easy:</strong> Visualize o preço e use o botão <strong>◀ Voltar</strong> no topo para conferir a outra operadora sem se perder!
         </span>
       </div>
 
-      {/* Anúncio Discreto */}
+      {/* Espaço de Banner Publicitário Discreto */}
       {!isAdFree && (
         <div style={{
           backgroundColor: '#f1f5f9',
