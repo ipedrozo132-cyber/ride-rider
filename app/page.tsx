@@ -211,8 +211,9 @@ const handleLaunch99 = () => {
 
     const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
 
+    // Formato com parâmetros universais completos compatíveis com iOS e Android
     const nativeUri = isIos
-      ? `taxis99://call?dropoff_lat=${destCoord.lat}&dropoff_lng=${destCoord.lng}&dropoff_name=${encodedDest}&pickup_lat=${pickupCoord.lat}&pickup_lng=${pickupCoord.lng}&pickup_name=${pTitle}`
+      ? `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&dest_lat=${destCoord.lat}&dest_lng=${destCoord.lng}&daddr=${destCoord.lat},${destCoord.lng}`
       : `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_action=call`
 
     if (isIos) {
