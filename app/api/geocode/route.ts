@@ -37,9 +37,9 @@ export async function GET(request: Request) {
     const bottom = userLat - delta
 
     // 2. Busca priorizada na região com countrycodes=br rígido
-    let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+   let url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
       q.trim()
-    )}&addressdetails=1&limit=10&countrycodes=br&viewbox=${left},${top},${right},${bottom}&bounded=1`
+    )}&addressdetails=1&limit=10&countrycodes=br&viewbox=${left},${top},${right},${bottom}&bounded=0&dedupe=1`
 
     let response = await fetch(url, {
       headers: {
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
     if (!data || data.length === 0) {
       const fallbackUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
         q.trim()
-      )}&addressdetails=1&limit=8&countrycodes=br`
+      )}&addressdetails=1&limit=8&countrycodes=br&viewbox=${left},${top},${right},${bottom}`
       
       const fallbackRes = await fetch(fallbackUrl, {
         headers: {
