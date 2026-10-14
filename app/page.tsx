@@ -198,7 +198,7 @@ export default function MakeEasyApp() {
   }
 
   // Disparo direto e confiável para o App da 99 com rota
-  const handleLaunch99 = () => {
+ const handleLaunch99 = () => {
     if (!destinationText.trim() || !destCoord) {
       showToast('⚠️ Digite ou selecione o destino primeiro!')
       setActiveField('destination')
@@ -210,13 +210,17 @@ export default function MakeEasyApp() {
     const pTitle = encodeURIComponent(isUsingGps ? 'Meu Local' : pickupText)
 
     const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
+
     const nativeUri = isIos
-      ? `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316&source=client`
-      : `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
+      ? `taxis99://call?lat=${destCoord.lat}&lng=${destCoord.lng}&dropoff_lat=${destCoord.lat}&dropoff_lng=${destCoord.lng}&dropoff_name=${encodedDest}&pickup_lat=${pickupCoord.lat}&pickup_lng=${pickupCoord.lng}&pickup_name=${pTitle}`
+      : `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_action=call`
 
-    window.location.assign(nativeUri)
+    if (isIos) {
+      window.location.href = nativeUri
+    } else {
+      window.location.assign(nativeUri)
+    }
   }
-
   const copyPixCode = () => {
     const pixPayload = '83468153872'
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
