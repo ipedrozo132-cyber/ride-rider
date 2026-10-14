@@ -212,11 +212,11 @@ const handleLaunch99 = () => {
     const isIos = typeof navigator !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent)
 
     const nativeUri = isIos
-      ? `https://d.didiglobal.com/taxis?pickup_lat=${pickupCoord.lat}&pickup_lng=${pickupCoord.lng}&pickup_name=${pTitle}&dropoff_lat=${destCoord.lat}&dropoff_lng=${destCoord.lng}&dropoff_name=${encodedDest}`
+      ? `taxis99://call?dropoff_lat=${destCoord.lat}&dropoff_lng=${destCoord.lng}&dropoff_name=${encodedDest}&pickup_lat=${pickupCoord.lat}&pickup_lng=${pickupCoord.lng}&pickup_name=${pTitle}`
       : `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_action=call`
 
     if (isIos) {
-      window.open(nativeUri, '_top')
+      window.location.href = nativeUri
     } else {
       window.location.assign(nativeUri)
     }
