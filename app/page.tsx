@@ -218,7 +218,7 @@ export default function MakeEasyApp() {
   }
 
   const copyPixCode = () => {
-    const pixPayload = 'contato@makeeasy.app'
+    const pixPayload = '83468153872'
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(pixPayload)
     }
@@ -762,9 +762,9 @@ export default function MakeEasyApp() {
               marginBottom: '14px'
             }}>
               <span style={{ fontSize: '10.5px', color: '#64748b', display: 'block', marginBottom: '4px' }}>
-                Chave Pix (E-mail):
+                Chave Pix (CPF):
               </span>
-              <strong style={{ fontSize: '13px', color: '#0f172a' }}>contato@makeeasy.app</strong>
+              <strong style={{ fontSize: '13px', color: '#0f172a' }}>834.681.538-72</strong>
             </div>
 
             <button
