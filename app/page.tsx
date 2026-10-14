@@ -44,7 +44,7 @@ export default function MakeEasyApp() {
   const [stopText, setStopText] = useState('')
   const [stopCoord, setStopCoord] = useState<{ lat: number; lng: number } | null>(null)
 
-  // Destino Final (Inicia em branco)
+  // Destino Final (Inicia limpo)
   const [destinationText, setDestinationText] = useState('')
   const [destCoord, setDestCoord] = useState<{ lat: number; lng: number } | null>(null)
 
@@ -56,9 +56,6 @@ export default function MakeEasyApp() {
   const [searchResults, setSearchResults] = useState<{ name: string; address: string; lat: number; lng: number }[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [savedPlaces, setSavedPlaces] = useState<string[]>(DEFAULT_PLACES)
-
-  // Controle do Visor de Cotação com Barra de Retorno
-  const [activeViewer, setActiveViewer] = useState<{ provider: 'uber' | '99'; url: string; nativeUri: string } | null>(null)
 
   // Alerta Flutuante
   const [toastMessage, setToastMessage] = useState<string | null>(null)
@@ -181,37 +178,29 @@ export default function MakeEasyApp() {
     }
   }
 
-  const handleOpenUberViewer = () => {
+  // Disparo direto e confiável para o App da Uber com rota
+  const handleLaunchUber = () => {
     if (!destinationText.trim() || !destCoord) {
-      showToast('⚠️ Por favor, digite e selecione o destino primeiro!')
+      showToast('⚠️ Digite ou selecione o destino primeiro!')
       setActiveField('destination')
       return
     }
 
     handleCopyStopAndNotify()
     const encodedDest = encodeURIComponent(destinationText)
-    
-    // URL web para visualização integrada
-    const webUrl = `https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=${destCoord.lat}&dropoff[longitude]=${destCoord.lng}&dropoff[formatted_address]=${encodedDest}`
-    
-    // URI nativa para caso o usuário queira alternar pro app oficial
-    let nativeUri = `uber://?action=setPickup&dropoff[latitude]=${destCoord.lat}&dropoff[longitude]=${destCoord.lng}&dropoff[formatted_address]=${encodedDest}`
+    let uri = `uber://?action=setPickup&dropoff[latitude]=${destCoord.lat}&dropoff[longitude]=${destCoord.lng}&dropoff[formatted_address]=${encodedDest}`
     if (isUsingGps) {
-      nativeUri += '&pickup=my_location'
+      uri += '&pickup=my_location'
     } else {
-      nativeUri += `&pickup[latitude]=${pickupCoord.lat}&pickup[longitude]=${pickupCoord.lng}&pickup[formatted_address]=${encodeURIComponent(pickupText)}`
+      uri += `&pickup[latitude]=${pickupCoord.lat}&pickup[longitude]=${pickupCoord.lng}&pickup[formatted_address]=${encodeURIComponent(pickupText)}`
     }
-
-    setActiveViewer({
-      provider: 'uber',
-      url: webUrl,
-      nativeUri
-    })
+    window.location.assign(uri)
   }
 
-  const handleOpen99Viewer = () => {
+  // Disparo direto e confiável para o App da 99 com rota
+  const handleLaunch99 = () => {
     if (!destinationText.trim() || !destCoord) {
-      showToast('⚠️ Por favor, digite e selecione o destino primeiro!')
+      showToast('⚠️ Digite ou selecione o destino primeiro!')
       setActiveField('destination')
       return
     }
@@ -225,14 +214,7 @@ export default function MakeEasyApp() {
       ? `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316&source=client`
       : `taxis99://call?pickup_latitude=${pickupCoord.lat}&pickup_longitude=${pickupCoord.lng}&pickup_title=${pTitle}&dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}&dropoff_title=${encodedDest}&deep_link_product_id=316`
 
-    // Visor web da 99
-    const webUrl = `https://page.didiglobal.com/passenger/passenger-share/order-price-detail?dropoff_latitude=${destCoord.lat}&dropoff_longitude=${destCoord.lng}`
-
-    setActiveViewer({
-      provider: '99',
-      url: webUrl,
-      nativeUri
-    })
+    window.location.assign(nativeUri)
   }
 
   const copyPixCode = () => {
@@ -259,86 +241,6 @@ export default function MakeEasyApp() {
       position: 'relative'
     }}>
       <MakeEasyBrand />
-
-      {/* Visor em Tela Cheia com Botão de Voltar Integrado */}
-      {activeViewer && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: '#ffffff',
-          zIndex: 99999,
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          {/* Barra Superior com Botão de Retorno */}
-          <div style={{
-            height: '56px',
-            backgroundColor: activeViewer.provider === '99' ? '#ffc107' : '#000000',
-            color: activeViewer.provider === '99' ? '#000000' : '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '0 12px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.15)',
-            flexShrink: 0
-          }}>
-            {/* Botão de Retorno Chamativo */}
-            <button
-              onClick={() => setActiveViewer(null)}
-              style={{
-                backgroundColor: activeViewer.provider === '99' ? '#000000' : '#ffffff',
-                color: activeViewer.provider === '99' ? '#ffffff' : '#000000',
-                border: 'none',
-                borderRadius: '10px',
-                padding: '8px 14px',
-                fontSize: '13px',
-                fontWeight: '800',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              ◀ Voltar ao Make Easy
-            </button>
-
-            <span style={{ fontSize: '13px', fontWeight: '850', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Cotação {activeViewer.provider === '99' ? '99' : 'Uber'}
-            </span>
-
-            {/* Alternativa para abrir no aplicativo caso prefira */}
-            <button
-              onClick={() => {
-                window.location.assign(activeViewer.nativeUri)
-              }}
-              style={{
-                background: 'none',
-                border: '1px solid currentColor',
-                borderRadius: '8px',
-                padding: '6px 8px',
-                fontSize: '10px',
-                fontWeight: '700',
-                color: 'inherit',
-                cursor: 'pointer'
-              }}
-            >
-              Abrir no App
-            </button>
-          </div>
-
-          {/* Área do Navegador Integrado */}
-          <iframe
-            src={activeViewer.url}
-            title="Cotação de Corrida"
-            style={{
-              width: '100%',
-              flex: 1,
-              border: 'none',
-              backgroundColor: '#ffffff'
-            }}
-          />
-        </div>
-      )}
 
       {/* Notificação Flutuante */}
       {toastMessage && (
@@ -696,14 +598,14 @@ export default function MakeEasyApp() {
           Cotar
         </span>
         <div style={{ fontSize: '11px', fontWeight: '600', color: '#64748b', marginTop: '1px' }}>
-          Toque para ver a tarifa com botão de retorno
+          Abre direto no app com trajeto pronto
         </div>
       </div>
 
       {/* Botões Centrais */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
         <button
-          onClick={handleOpen99Viewer}
+          onClick={handleLaunch99}
           style={{
             backgroundColor: '#ffffff',
             border: '2px solid #ffc107',
@@ -731,7 +633,7 @@ export default function MakeEasyApp() {
         </button>
 
         <button
-          onClick={handleOpenUberViewer}
+          onClick={handleLaunchUber}
           style={{
             backgroundColor: '#ffffff',
             border: '2px solid #000000',
@@ -758,11 +660,11 @@ export default function MakeEasyApp() {
         marginBottom: '24px'
       }}>
         <span style={{ fontSize: '11.6px', color: '#64748b', lineHeight: 1.5 }}>
-          💡 <strong>Praticidade Make Easy:</strong> Visualize o preço e use o botão <strong>◀ Voltar</strong> no topo para conferir a outra operadora sem se perder!
+          💡 <strong>Dica de uso:</strong> Monte seu percurso, toque em uma operadora e use a troca rápida de aplicativos no rodapé para alternar e cotar na outra em segundos!
         </span>
       </div>
 
-      {/* Espaço de Banner Publicitário Discreto */}
+      {/* Espaço de Banner Publicitário */}
       {!isAdFree && (
         <div style={{
           backgroundColor: '#f1f5f9',
