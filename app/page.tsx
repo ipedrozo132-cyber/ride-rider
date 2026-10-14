@@ -707,7 +707,14 @@ export default function MakeEasyApp() {
           gap: '6px'
         }}
       >
-        ☕ Gostou da praticidade? Apoie o projeto e remova anúncios
+       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
+  <span style={{ fontSize: '13px', fontWeight: '700' }}>
+    ☕ Gostou da praticidade?
+  </span>
+  <span style={{ fontSize: '11px', opacity: 0.9, fontWeight: '400' }}>
+    Apoie o projeto e remova os anúncios
+  </span>
+</div>
       </button>
 
       {/* Rodapé */}
