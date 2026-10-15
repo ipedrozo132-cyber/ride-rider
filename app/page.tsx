@@ -198,14 +198,13 @@ export default function MakeEasyApp() {
   }
 
   // Disparo direto e confiável para o App da 99 com rota
-const handleLaunch99 = () => {
+  const handleLaunch99 = () => {
     if (!destinationText.trim() || !destCoord) {
       showToast('⚠️ Digite ou selecione o destino primeiro!')
       setActiveField('destination')
       return
     }
 
-    handleCopyStopAndNotify()
     const encodedDest = encodeURIComponent(destinationText)
     const pTitle = encodeURIComponent(isUsingGps ? 'Meu Local' : pickupText)
 
