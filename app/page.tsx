@@ -338,66 +338,7 @@ export default function MakeEasyApp() {
           </button>
         </div>
 
-        {/* Ponto 2: Parada Intermediária (Opcional) */}
-        {hasStop && (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '8px',
-            marginBottom: '12px',
-            paddingTop: '8px',
-            borderTop: '1px dashed #e2e8f0'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
-              <div style={{
-                width: '13px',
-                height: '13px',
-                borderRadius: '3px',
-                backgroundColor: '#f59e0b',
-                boxShadow: '0 0 0 3px rgba(245, 158, 11, 0.2)',
-                flexShrink: 0
-              }} />
-              <input
-                type="text"
-                value={stopText}
-                onFocus={() => setActiveField('stop')}
-                onChange={(e) => {
-                  setStopText(e.target.value)
-                  searchAddress(e.target.value)
-                }}
-                placeholder="Parada intermediária..."
-                style={{
-                  width: '100%',
-                  border: 'none',
-                  outline: 'none',
-                  background: 'transparent',
-                  fontSize: '13.5px',
-                  fontWeight: '600',
-                  color: '#0f172a'
-                }}
-              />
-            </div>
-            <button
-              onClick={() => {
-                setHasStop(false)
-                setStopText('')
-                setStopCoord(null)
-              }}
-              style={{
-                border: 'none',
-                background: 'none',
-                color: '#94a3b8',
-                fontSize: '11px',
-                fontWeight: '700',
-                cursor: 'pointer'
-              }}
-            >
-              ✕ Remover
-            </button>
-          </div>
-        )}
-
+       
         {/* Ponto 3: Destino Final */}
         <div style={{
           display: 'flex',
@@ -405,7 +346,7 @@ export default function MakeEasyApp() {
           justifyContent: 'space-between',
           gap: '8px',
           paddingTop: '8px',
-          borderTop: hasStop ? 'none' : '1px solid #f1f5f9'
+          borderTop: '1px solid #f1f5f9'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
             <div style={{
@@ -438,30 +379,7 @@ export default function MakeEasyApp() {
           </div>
         </div>
 
-        {/* Botão de Adicionar Parada */}
-        {!hasStop && (
-          <div style={{ marginTop: '10px', paddingTop: '8px', borderTop: '1px solid #f8fafc', display: 'flex', justifyContent: 'flex-end' }}>
-            <button
-              onClick={() => {
-                setHasStop(true)
-                setActiveField('stop')
-              }}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#2563eb',
-                fontSize: '11.5px',
-                fontWeight: '700',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px'
-              }}
-            >
-              + Adicionar Parada Intermediária
-            </button>
-          </div>
-        )}
+       
       </div>
 
       {/* Telemetria do Percurso */}
