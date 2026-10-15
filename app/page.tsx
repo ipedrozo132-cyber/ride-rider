@@ -144,9 +144,7 @@ export default function MakeEasyApp() {
     if (activeField === 'pickup') {
       setPickupText(item.name)
       setPickupCoord({ lat: item.lat, lng: item.lng })
-    } else if (activeField === 'stop') {
-      setStopText(item.name)
-      setStopCoord({ lat: item.lat, lng: item.lng })
+    
     } else if (activeField === 'destination') {
       setDestinationText(item.name)
       setDestCoord({ lat: item.lat, lng: item.lng })
@@ -361,10 +359,13 @@ export default function MakeEasyApp() {
               type="text"
               value={destinationText}
               onFocus={() => setActiveField('destination')}
-              onChange={(e) => {
-                setDestinationText(e.target.value)
-                searchAddress(e.target.value)
-              }}
+             onChange={(e) => {
+                  const val = e.target.value
+                  setDestinationText(val)
+                  setDestCoord(null)
+                  setRouteInfo(null)
+                  searchAddress(val)
+                }}
               placeholder="Para onde quer ir?"
               style={{
                 width: '100%',
@@ -439,7 +440,11 @@ export default function MakeEasyApp() {
               overflow: 'hidden',
               textOverflow: 'ellipsis'
             }}>
-              {isSearching ? '🔍 Buscando...' : searchResults.length > 0 ? 'Endereços Encontrados' : '⚡ Locais Rápidos'}
+             {isSearching
+  ? '🔍 Buscando...'
+  : (activeField === 'destination' ? destinationText : pickupText).trim().length > 0
+  ? (searchResults.length > 0 ? 'Endereços Encontrados' : 'Nenhum endereço encontrado')
+  : '⚡ Locais Rápidos'}
             </span>
 
             <button
@@ -487,7 +492,11 @@ export default function MakeEasyApp() {
                 </button>
               ))}
             </div>
-          ) : (
+          ) : (activeField === 'destination' ? destinationText : pickupText).trim().length > 0 ? (
+                  <div style={{ padding: '12px', textAlign: 'center', fontSize: '12px', color: '#64748b' }}>
+                    {isSearching ? 'Pesquisando endereços...' : 'Nenhum local encontrado para esta busca.'}
+                  </div>
+                ) : (
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {savedPlaces.map((place, idx) => (
                 <button
